@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Omar Nouh — CS & AI Engineer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0C0E12;
+    --bg-2: #13161C;
+    --bg-3: #1A1E27;
+    --amber: #F0A500;
+    --amber-dim: #A37010;
+    --amber-glow: rgba(240,165,0,0.08);
+    --blue: #6B9FD4;
+    --text: #E8E6DF;
+    --text-mid: #9A9891;
+    --text-dim: #5C5A55;
+    --border: rgba(255,255,255,0.06);
+    --border-2: rgba(255,255,255,0.1);
+    --radius: 8px;
+    --radius-lg: 16px;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  /* ─── NAV ─── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.25rem 3rem;
+    background: rgba(12,14,18,0.85);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+    transition: padding 0.3s;
+  }
+  .nav-logo {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.9rem;
+    color: var(--amber);
+    letter-spacing: 0.04em;
+    text-decoration: none;
+  }
+  .nav-links { display: flex; gap: 2rem; list-style: none; }
+  .nav-links a {
+    font-size: 0.825rem;
+    color: var(--text-mid);
+    text-decoration: none;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    font-weight: 500;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--text); }
+
+  /* ─── HERO ─── */
+  #hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 8rem 3rem 4rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-grid-bg {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+    background-size: 60px 60px;
+    mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, black 30%, transparent 80%);
+  }
+  .hero-orb {
+    position: absolute;
+    top: 20%; left: 60%;
+    width: 500px; height: 500px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(240,165,0,0.07) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-content { position: relative; max-width: 860px; }
+  .hero-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    color: var(--amber);
+    letter-spacing: 0.1em;
+    margin-bottom: 1.75rem;
+    opacity: 0;
+    animation: fadeUp 0.6s 0.2s forwards;
+  }
+  .hero-tag::before {
+    content: '';
+    display: inline-block;
+    width: 24px; height: 1px;
+    background: var(--amber);
+  }
+  h1.hero-name {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(3rem, 7vw, 5.5rem);
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    color: var(--text);
+    margin-bottom: 1rem;
+    opacity: 0;
+    animation: fadeUp 0.7s 0.4s forwards;
+  }
+  .hero-name span { color: var(--amber); }
+  .hero-subtitle {
+    font-size: 1.15rem;
+    color: var(--text-mid);
+    font-weight: 300;
+    max-width: 560px;
+    margin-bottom: 2.5rem;
+    opacity: 0;
+    animation: fadeUp 0.7s 0.6s forwards;
+  }
+  .hero-cta {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    opacity: 0;
+    animation: fadeUp 0.7s 0.8s forwards;
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.75rem;
+    border-radius: var(--radius);
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.2s;
+    cursor: pointer;
+    border: none;
+    font-family: inherit;
+  }
+  .btn-primary {
+    background: var(--amber);
+    color: #0C0E12;
+  }
+  .btn-primary:hover { background: #ffbb20; transform: translateY(-1px); }
+  .btn-outline {
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--border-2);
+  }
+  .btn-outline:hover { border-color: var(--amber); color: var(--amber); }
+  .hero-scroll {
+    position: absolute;
+    bottom: 2.5rem;
+    left: 3rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--text-dim);
+    letter-spacing: 0.08em;
+    opacity: 0;
+    animation: fadeUp 0.7s 1.2s forwards;
+  }
+  .scroll-line {
+    width: 40px; height: 1px;
+    background: var(--text-dim);
+  }
+
+  /* ─── SECTION BASE ─── */
+  section { padding: 6rem 3rem; }
+  .section-inner { max-width: 1000px; margin: 0 auto; }
+  .section-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--amber);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .section-label::after {
+    content: '';
+    flex: 1;
+    max-width: 48px;
+    height: 1px;
+    background: var(--amber-dim);
+  }
+  h2.section-title {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(1.75rem, 3.5vw, 2.5rem);
+    font-weight: 700;
+    line-height: 1.1;
+    color: var(--text);
+    margin-bottom: 3rem;
+    letter-spacing: -0.02em;
+  }
+
+  /* ─── ABOUT ─── */
+  #about { background: var(--bg-2); }
+  .about-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: start;
+  }
+  .about-text p {
+    color: var(--text-mid);
+    margin-bottom: 1.25rem;
+    font-size: 1rem;
+    line-height: 1.8;
+  }
+  .about-text p:last-child { margin-bottom: 0; }
+  .about-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+  .stat-card {
+    background: var(--bg-3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    transition: border-color 0.2s;
+  }
+  .stat-card:hover { border-color: var(--amber-dim); }
+  .stat-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--amber);
+    line-height: 1;
+    margin-bottom: 0.35rem;
+  }
+  .stat-label {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    letter-spacing: 0.04em;
+  }
+  .contact-list {
+    margin-top: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+  .contact-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--text-mid);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .contact-item:hover { color: var(--amber); }
+  .contact-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--amber);
+    flex-shrink: 0;
+  }
+
+  /* ─── SKILLS ─── */
+  #skills {}
+  .skills-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+  }
+  .skill-group {
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1.75rem;
+    transition: border-color 0.3s, transform 0.2s;
+  }
+  .skill-group:hover {
+    border-color: rgba(240,165,0,0.3);
+    transform: translateY(-2px);
+  }
+  .skill-group-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--amber);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 1.25rem;
+    padding-bottom: 0.875rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .skill-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .skill-tag {
+    padding: 0.3rem 0.75rem;
+    border-radius: 4px;
+    font-size: 0.78rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 400;
+    background: var(--bg-3);
+    color: var(--text-mid);
+    border: 1px solid var(--border);
+    transition: all 0.15s;
+  }
+  .skill-tag:hover {
+    background: var(--amber-glow);
+    color: var(--amber);
+    border-color: var(--amber-dim);
+  }
+
+  /* ─── EXPERIENCE ─── */
+  #experience { background: var(--bg-2); }
+  .timeline { position: relative; }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 8px; bottom: 0;
+    width: 1px;
+    background: var(--border-2);
+  }
+  .timeline-item {
+    position: relative;
+    padding-left: 2.5rem;
+    margin-bottom: 3rem;
+    opacity: 0;
+    transform: translateX(-10px);
+    transition: opacity 0.5s, transform 0.5s;
+  }
+  .timeline-item.visible { opacity: 1; transform: translateX(0); }
+  .timeline-dot {
+    position: absolute;
+    left: -5px; top: 8px;
+    width: 11px; height: 11px;
+    border-radius: 50%;
+    background: var(--amber);
+    border: 2px solid var(--bg-2);
+    box-shadow: 0 0 0 3px rgba(240,165,0,0.15);
+  }
+  .timeline-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 0.25rem;
+  }
+  .timeline-company {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--amber);
+    letter-spacing: 0.06em;
+  }
+  .timeline-date {
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .timeline-role {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 0.75rem;
+  }
+  .timeline-desc {
+    font-size: 0.9rem;
+    color: var(--text-mid);
+    line-height: 1.75;
+  }
+
+  /* ─── PROJECTS ─── */
+  .projects-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+  }
+  .project-card {
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    transition: border-color 0.3s, transform 0.25s;
+    position: relative;
+    overflow: hidden;
+  }
+  .project-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--amber), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .project-card:hover {
+    border-color: rgba(240,165,0,0.25);
+    transform: translateY(-3px);
+  }
+  .project-card:hover::before { opacity: 1; }
+  .project-header { display: flex; justify-content: space-between; align-items: flex-start; }
+  .project-icon {
+    width: 40px; height: 40px;
+    border-radius: 8px;
+    background: var(--amber-glow);
+    border: 1px solid rgba(240,165,0,0.2);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem;
+  }
+  .project-lang {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--text-dim);
+    letter-spacing: 0.06em;
+    padding: 0.25rem 0.6rem;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+  }
+  .project-name {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--text);
+  }
+  .project-desc {
+    font-size: 0.86rem;
+    color: var(--text-mid);
+    line-height: 1.7;
+    flex: 1;
+  }
+  .project-tags { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+  .project-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.68rem;
+    padding: 0.2rem 0.55rem;
+    border-radius: 3px;
+    background: var(--bg-3);
+    color: var(--blue);
+    border: 1px solid rgba(107,159,212,0.15);
+  }
+
+  /* ─── EDUCATION ─── */
+  #education { background: var(--bg-2); }
+  .edu-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+  }
+  .edu-card {
+    background: var(--bg-3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    transition: border-color 0.2s;
+  }
+  .edu-card:hover { border-color: var(--amber-dim); }
+  .edu-degree {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--amber);
+    letter-spacing: 0.1em;
+    margin-bottom: 0.6rem;
+  }
+  .edu-school {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 0.35rem;
+    line-height: 1.3;
+  }
+  .edu-year {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    margin-bottom: 1rem;
+  }
+  .edu-detail {
+    font-size: 0.83rem;
+    color: var(--text-mid);
+    line-height: 1.6;
+  }
+  .gpa-badge {
+    display: inline-block;
+    margin-top: 0.75rem;
+    padding: 0.3rem 0.8rem;
+    background: var(--amber-glow);
+    border: 1px solid rgba(240,165,0,0.3);
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--amber);
+    letter-spacing: 0.08em;
+  }
+
+  /* ─── FOOTER ─── */
+  footer {
+    padding: 3rem;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  .footer-name {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--text);
+  }
+  .footer-copy {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--text-dim);
+    letter-spacing: 0.06em;
+  }
+  .footer-links {
+    display: flex;
+    gap: 1.5rem;
+  }
+  .footer-links a {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .footer-links a:hover { color: var(--amber); }
+
+  /* ─── ANIMATIONS ─── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .reveal {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s, transform 0.6s;
+  }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 768px) {
+    nav { padding: 1rem 1.5rem; }
+    .nav-links { display: none; }
+    section { padding: 4rem 1.5rem; }
+    #hero { padding: 6rem 1.5rem 3rem; }
+    .hero-scroll { left: 1.5rem; }
+    .about-grid, .edu-grid { grid-template-columns: 1fr; }
+    footer { padding: 2rem 1.5rem; flex-direction: column; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#hero" class="nav-logo">ON_</a>
+  <ul class="nav-links">
+    <li><a href="#about">About</a></li>
+    <li><a href="#skills">Skills</a></li>
+    <li><a href="#experience">Experience</a></li>
+    <li><a href="#projects">Projects</a></li>
+    <li><a href="#education">Education</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-grid-bg"></div>
+  <div class="hero-orb"></div>
+  <div class="hero-content">
+    <div class="hero-tag">CS &amp; AI Engineering · Cairo, Egypt</div>
+    <h1 class="hero-name">Omar<br>Nouh<span>.</span></h1>
+    <p class="hero-subtitle">Building from silicon to software — OS kernels, FPGA processors, deep learning pipelines, and everything in between.</p>
+    <div class="hero-cta">
+      <a href="mailto:onouh7@gmail.com" class="btn btn-primary">Get in touch</a>
+      <a href="#projects" class="btn btn-outline">View projects</a>
+      <a href="https://linkedin.com/in/onouh" class="btn btn-outline" target="_blank">LinkedIn</a>
+      <a href="https://github.com/onouh" class="btn btn-outline" target="_blank">GitHub</a>
+    </div>
+  </div>
+  <div class="hero-scroll">
+    <span class="scroll-line"></span>
+    <span>Learn more</span>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="section-inner">
+    <div class="section-label">01 — About</div>
+    <h2 class="section-title reveal">Who I Am</h2>
+    <div class="about-grid">
+      <div class="about-text reveal">
+        <p>I'm a second-year Computer &amp; Artificial Intelligence Engineering student at Ain Shams University, focused on cross-stack development — from hardware architecture to scalable software systems.</p>
+        <p>My work spans custom OS kernel development, RTL design on FPGAs, compiler construction, and deep learning pipelines. I'm drawn to the intersection of low-level systems thinking and high-level intelligent systems.</p>
+        <p>Beyond engineering, I compete in Model United Nations and triathlons — both of which demand the same rigor I bring to code.</p>
+        <div class="contact-list">
+          <a href="mailto:onouh7@gmail.com" class="contact-item">
+            <span class="contact-dot"></span>onouh7@gmail.com
+          </a>
+          <a class="contact-item">
+            <span class="contact-dot"></span>+1 (503) 506-5006 | +20 (110) 006-3055
+          </a>
+          <a href="https://linkedin.com/in/onouh" class="contact-item" target="_blank">
+            <span class="contact-dot"></span>linkedin.com/onouh
+          </a>
+          <a href="https://github.com/onouh" class="contact-item" target="_blank">
+            <span class="contact-dot"></span>github.com/onouh
+          </a>
+        </div>
+      </div>
+      <div class="about-stats reveal">
+        <div class="stat-card">
+          <div class="stat-num">3.55</div>
+          <div class="stat-label">GPA at Ain Shams University</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num">3+</div>
+          <div class="stat-label">Professional internships completed</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num">5+</div>
+          <div class="stat-label">Engineering projects built</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num">3</div>
+          <div class="stat-label">Languages spoken fluently</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SKILLS -->
+<section id="skills">
+  <div class="section-inner">
+    <div class="section-label">02 — Technical Skills</div>
+    <h2 class="section-title reveal">What I Build With</h2>
+    <div class="skills-grid">
+      <div class="skill-group reveal">
+        <div class="skill-group-title">Languages</div>
+        <div class="skill-tags">
+          <span class="skill-tag">C</span>
+          <span class="skill-tag">C++</span>
+          <span class="skill-tag">Python</span>
+          <span class="skill-tag">Java</span>
+          <span class="skill-tag">C#</span>
+          <span class="skill-tag">VHDL</span>
+          <span class="skill-tag">MIPS Assembly</span>
+          <span class="skill-tag">JavaScript</span>
+          <span class="skill-tag">SQL</span>
+        </div>
+      </div>
+      <div class="skill-group reveal">
+        <div class="skill-group-title">Systems &amp; Architecture</div>
+        <div class="skill-tags">
+          <span class="skill-tag">Memory Management</span>
+          <span class="skill-tag">OS Kernel (FOS)</span>
+          <span class="skill-tag">CPU Scheduling</span>
+          <span class="skill-tag">RTL Design</span>
+          <span class="skill-tag">FPGA</span>
+          <span class="skill-tag">HW-SW Interface</span>
+        </div>
+      </div>
+      <div class="skill-group reveal">
+        <div class="skill-group-title">Tools &amp; Frameworks</div>
+        <div class="skill-tags">
+          <span class="skill-tag">Git / GitHub</span>
+          <span class="skill-tag">Vivado</span>
+          <span class="skill-tag">LTSpice</span>
+          <span class="skill-tag">.NET / WinForms</span>
+          <span class="skill-tag">PyTorch</span>
+          <span class="skill-tag">scikit-learn</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- EXPERIENCE -->
+<section id="experience">
+  <div class="section-inner">
+    <div class="section-label">03 — Experience</div>
+    <h2 class="section-title reveal">Where I've Worked</h2>
+    <div class="timeline">
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="timeline-meta">
+          <span class="timeline-company">e& - Enterprise Security</span>
+          <span class="timeline-date">Aug 2024</span>
+        </div>
+        <div class="timeline-role">Cybersecurity Analyst Intern</div>
+        <div class="timeline-desc">Evaluated enterprise-level telecommunications network infrastructure, analyzing low-level vulnerabilities and cyber defense strategies. Applied Governance, Risk &amp; Compliance (GRC) frameworks, bridging the gap between low-level information systems and high-level security protocols.</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="timeline-meta">
+          <span class="timeline-company">Future Career — Business Process Automation</span>
+          <span class="timeline-date">Jul 2024</span>
+        </div>
+        <div class="timeline-role">Automation Engineer Intern</div>
+        <div class="timeline-desc">Built API-driven automation flows using Activepieces, integrating third-party services to streamline complex business data routing. Reduced manual overhead by 50% and accelerated client engagement metrics by 25% within a two-month lifecycle.</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="timeline-meta">
+          <span class="timeline-company">Dell Technologies — Cloud Infrastructure</span>
+          <span class="timeline-date">Dec 2024</span>
+        </div>
+        <div class="timeline-role">Cloud Trainee</div>
+        <div class="timeline-desc">Explored infrastructure constraints across Dell's cloud platform, developing foundational understanding of availability, deployment strategies, and scalable distributed system design.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROJECTS -->
+<section id="projects">
+  <div class="section-inner">
+    <div class="section-label">04 — Projects</div>
+    <h2 class="section-title reveal">What I've Built</h2>
+    <div class="projects-grid">
+
+      <div class="project-card reveal">
+        <div class="project-header">
+          <div class="project-icon">⚙️</div>
+          <span class="project-lang">C / C++</span>
+        </div>
+        <div class="project-name">FOS Kernel</div>
+        <div class="project-desc">Full OS kernel implementing a Multi-Level Feedback Queue (MLFQ) scheduler with dynamic priority boosting, a heap allocator, virtual-to-physical address translation, Nth-Chance Clock page replacement, hierarchical page tables, file I/O, and robust fault handlers.</div>
+        <div class="project-tags">
+          <span class="project-tag">OS</span>
+          <span class="project-tag">Memory Mgmt</span>
+          <span class="project-tag">Scheduling</span>
+          <span class="project-tag">Page Tables</span>
+        </div>
+      </div>
+
+      <div class="project-card reveal">
+        <div class="project-header">
+          <div class="project-icon">🔤</div>
+          <span class="project-lang">C / C++</span>
+        </div>
+        <div class="project-name">Tiny Compiler</div>
+        <div class="project-desc">Built a compiler from scratch with a hand-coded lexer using Regular DFAs for tokenization, error recovery, CFG-based parser, and recursive-descent syntax tree generation — validating control flow, functions, loops, and variable expressions.</div>
+        <div class="project-tags">
+          <span class="project-tag">Compilers</span>
+          <span class="project-tag">Automata</span>
+          <span class="project-tag">CFG</span>
+          <span class="project-tag">Parsing</span>
+        </div>
+      </div>
+
+      <div class="project-card reveal">
+        <div class="project-header">
+          <div class="project-icon">🎬</div>
+          <span class="project-lang">SQL Server / C#</span>
+        </div>
+        <div class="project-name">Cinema Booking System</div>
+        <div class="project-desc">Relational database normalized to 3NF with role-based access control, zero ad-hoc query layer, and a full desktop app featuring user authentication and concurrent order management.</div>
+        <div class="project-tags">
+          <span class="project-tag">3NF</span>
+          <span class="project-tag">SQL Server</span>
+          <span class="project-tag">WinForms</span>
+          <span class="project-tag">RBAC</span>
+        </div>
+      </div>
+
+      <div class="project-card reveal">
+        <div class="project-header">
+          <div class="project-icon">🔬</div>
+          <span class="project-lang">VHDL / Vivado</span>
+        </div>
+        <div class="project-name">32-Bit Single-Cycle Processor</div>
+        <div class="project-desc">Designed and simulated a complete 32-bit datapath using Xilinx toolchain — including ALU, register file, instruction decoder, and support for R-type and I-type instructions, with comprehensive testbenches for branch logic and hazard detection.</div>
+        <div class="project-tags">
+          <span class="project-tag">RTL</span>
+          <span class="project-tag">FPGA</span>
+          <span class="project-tag">ALU</span>
+          <span class="project-tag">Datapath</span>
+        </div>
+      </div>
+
+      <div class="project-card reveal">
+        <div class="project-header">
+          <div class="project-icon">🖼️</div>
+          <span class="project-lang">Python / PyTorch</span>
+        </div>
+        <div class="project-name">Scene Classifier</div>
+        <div class="project-desc">Fine-tuned ConvNeXt and Swin Transformer models for scene classification using transfer learning and modern training techniques, achieving 60.3% top-1 accuracy on the target dataset.</div>
+        <div class="project-tags">
+          <span class="project-tag">Deep Learning</span>
+          <span class="project-tag">ConvNeXt</span>
+          <span class="project-tag">Swin-T</span>
+          <span class="project-tag">Fine-tuning</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- EDUCATION -->
+<section id="education">
+  <div class="section-inner">
+    <div class="section-label">05 — Education</div>
+    <h2 class="section-title reveal">Academic Background</h2>
+    <div class="edu-grid">
+      <div class="edu-card reveal">
+        <div class="edu-degree">B.SC. COMPUTER &amp; AI ENGINEERING</div>
+        <div class="edu-school">Ain Shams University<br><span style="font-size:0.85rem;font-weight:400;color:var(--text-mid);">&amp; University of East London (Dual Degree)</span></div>
+        <div class="edu-year">Expected 2028</div>
+        <div class="edu-detail">Coursework: Operating Systems, Compiler Design, Logic Design, Data Structures &amp; Algorithms, Artificial Intelligence, Discrete Mathematics</div>
+        <div class="gpa-badge">GPA: 3.55</div>
+      </div>
+      <div class="edu-card reveal">
+        <div class="edu-degree">BACCALAURÉAT FRANÇAIS</div>
+        <div class="edu-school">Collège de la Sainte Famille</div>
+        <div class="edu-year">2024</div>
+        <div class="edu-detail">Graduated with Highest Honors — Cum Laude &amp; Félicitations du Jury.</div>
+        <div style="margin-top:1rem;">
+          <div class="edu-detail" style="margin-bottom:0.75rem;font-weight:500;color:var(--text);">Languages</div>
+          <div class="skill-tags">
+            <span class="skill-tag">English — Native</span>
+            <span class="skill-tag">French — Native</span>
+            <span class="skill-tag">Arabic — Native</span>
+            <span class="skill-tag">Spanish — Intermediate</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-name">Omar Nouh</div>
+  <div class="footer-links">
+    <a href="mailto:onouh7@gmail.com">Email</a>
+    <a href="https://linkedin.com/in/onouh" target="_blank">LinkedIn</a>
+    <a href="https://github.com/onouh" target="_blank">GitHub</a>
+  </div>
+  <div class="footer-copy">Cairo, Egypt — 2025</div>
+</footer>
+
+<script>
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(el => {
+      if (el.isIntersecting) {
+        el.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.12 });
+
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+  document.querySelectorAll('.timeline-item').forEach((el, i) => {
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          setTimeout(() => e.target.classList.add('visible'), i * 120);
+        }
+      });
+    }, { threshold: 0.1 });
+    io.observe(el);
+  });
+
+  const nav = document.querySelector('nav');
+  window.addEventListener('scroll', () => {
+    nav.style.padding = window.scrollY > 40 ? '0.875rem 3rem' : '1.25rem 3rem';
+  });
+</script>
+</body>
+</html>
