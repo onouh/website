@@ -35,12 +35,12 @@ export default function EducationPage() {
               {item.detail}
             </p>
             {item.gpa ? (
-              <span className="mt-4 inline-block rounded border border-[rgba(240,165,0,0.3)] bg-[var(--amber-glow)] px-3 py-1 font-[family-name:var(--font-jetbrains)] text-[0.72rem] tracking-wide text-[var(--amber)]">
+              <span className="mt-4 inline-block rounded border border-[rgba(47,107,255,0.3)] bg-[var(--amber-glow)] px-3 py-1 font-[family-name:var(--font-jetbrains)] text-[0.72rem] tracking-wide text-[var(--amber)]">
                 {item.gpa}
               </span>
             ) : null}
             {item.honors && !item.gpa ? (
-              <span className="mt-4 inline-block rounded border border-[rgba(240,165,0,0.3)] bg-[var(--amber-glow)] px-3 py-1 font-[family-name:var(--font-jetbrains)] text-[0.72rem] tracking-wide text-[var(--amber)]">
+              <span className="mt-4 inline-block rounded border border-[rgba(47,107,255,0.3)] bg-[var(--amber-glow)] px-3 py-1 font-[family-name:var(--font-jetbrains)] text-[0.72rem] tracking-wide text-[var(--amber)]">
                 {item.honors}
               </span>
             ) : null}

@@ -16,17 +16,17 @@ export default function OpenGraphImage() {
           flexDirection: "column",
           justifyContent: "center",
           padding: 80,
-          background: "#0C0E12",
-          color: "#E8E6DF",
+          background: "#05070c",
+          color: "#f7f8fa",
         }}
       >
-        <div style={{ color: "#F0A500", fontSize: 28, letterSpacing: 4 }}>
+        <div style={{ color: "#2f6bff", fontSize: 28, letterSpacing: 4 }}>
           {profile.title.toUpperCase()}
         </div>
         <div style={{ fontSize: 72, fontWeight: 800, marginTop: 16 }}>
           {profile.name}
         </div>
-        <div style={{ fontSize: 28, color: "#9A9891", marginTop: 20, maxWidth: 900 }}>
+        <div style={{ fontSize: 28, color: "#8b96ab", marginTop: 20, maxWidth: 900 }}>
           {profile.tagline}
         </div>
       </div>

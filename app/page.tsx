@@ -12,7 +12,7 @@ export default function HomePage() {
         <div className="hero-grid-bg" aria-hidden />
         <div
           aria-hidden
-          className="pointer-events-none absolute top-[20%] left-[60%] h-[500px] w-[500px] rounded-full bg-[radial-gradient(circle,rgba(240,165,0,0.07)_0%,transparent_70%)]"
+          className="pointer-events-none absolute top-[20%] left-[60%] h-[500px] w-[500px] rounded-full bg-[radial-gradient(circle,rgba(47,107,255,0.07)_0%,transparent_70%)]"
         />
         <div className="relative mx-auto w-full max-w-[860px]">
           <p className="animate-fade-up mb-7 inline-flex items-center gap-2 font-[family-name:var(--font-jetbrains)] text-[0.78rem] tracking-[0.1em] text-[var(--amber)] [animation-delay:0.1s] [animation-fill-mode:both] opacity-0">

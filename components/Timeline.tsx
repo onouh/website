@@ -7,7 +7,7 @@ export function Timeline({ items }: { items: ExperienceItem[] }) {
         <li key={`${item.company}-${item.date}`} className="relative mb-12 pl-10 last:mb-0">
           <span
             aria-hidden
-            className="absolute top-2 left-[-5px] h-[11px] w-[11px] rounded-full border-2 border-[var(--bg-2)] bg-[var(--amber)] shadow-[0_0_0_3px_rgba(240,165,0,0.15)]"
+            className="absolute top-2 left-[-5px] h-[11px] w-[11px] rounded-full border-2 border-[var(--bg-2)] bg-[var(--amber)] shadow-[0_0_0_3px_rgba(47,107,255,0.15)]"
           />
           <div className="mb-1 flex flex-wrap items-baseline justify-between gap-2">
             <span className="font-[family-name:var(--font-jetbrains)] text-xs tracking-wide text-[var(--amber)]">

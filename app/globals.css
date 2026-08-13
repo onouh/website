@@ -1,16 +1,18 @@
 @import "tailwindcss";
 
 :root {
-  --bg: #0c0e12;
-  --bg-2: #13161c;
-  --bg-3: #1a1e27;
-  --amber: #f0a500;
-  --amber-dim: #a37010;
-  --amber-glow: rgba(240, 165, 0, 0.08);
-  --blue: #6b9fd4;
-  --text: #e8e6df;
-  --text-mid: #9a9891;
-  --text-dim: #5c5a55;
+  --bg: #05070c;
+  --bg-2: #0a1628;
+  --bg-3: #122038;
+  --quantum: #2f6bff;
+  --amber: var(--quantum);
+  --amber-dim: #1e4ecc;
+  --amber-glow: rgba(47, 107, 255, 0.08);
+  --blue: #5b8aff;
+  --red: #e11d2e;
+  --text: #f7f8fa;
+  --text-mid: #8b96ab;
+  --text-dim: #5a6578;
   --border: rgba(255, 255, 255, 0.06);
   --border-2: rgba(255, 255, 255, 0.1);
   --radius: 8px;
@@ -46,7 +48,7 @@ body {
 }
 
 :focus-visible {
-  outline: 2px solid var(--amber);
+  outline: 2px solid var(--quantum);
   outline-offset: 3px;
 }
 
@@ -55,8 +57,8 @@ body {
   left: 1rem;
   top: -100%;
   z-index: 200;
-  background: var(--amber);
-  color: #0c0e12;
+  background: #fff;
+  color: var(--red);
   padding: 0.5rem 1rem;
   border-radius: var(--radius);
   font-weight: 600;
@@ -84,12 +86,12 @@ body {
 }
 
 .btn-primary {
-  background: var(--amber);
-  color: #0c0e12;
+  background: var(--red);
+  color: #fff;
 }
 
 .btn-primary:hover {
-  background: #ffbb20;
+  background: #f1283a;
   transform: translateY(-1px);
 }
 
@@ -100,8 +102,8 @@ body {
 }
 
 .btn-outline:hover {
-  border-color: var(--amber);
-  color: var(--amber);
+  border-color: var(--quantum);
+  color: var(--quantum);
 }
 
 .section-label {
