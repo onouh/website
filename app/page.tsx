@@ -19,13 +19,13 @@ export default function HomePage() {
             <span aria-hidden className="inline-block h-px w-6 bg-[var(--amber)]" />
             {profile.title} · {profile.location}
           </p>
-          <h1 className="animate-fade-up mb-4 font-[family-name:var(--font-syne)] text-[clamp(3rem,7vw,5.5rem)] leading-none font-extrabold tracking-tight [animation-delay:0.2s] [animation-fill-mode:both] opacity-0">
+          <h1 className="animate-fade-up mb-4 font-[family-name:var(--font-syne)] text-[clamp(3rem,7vw,5.5rem)] leading-none font-bold tracking-[-0.045em] [animation-delay:0.2s] [animation-fill-mode:both] opacity-0">
             {profile.firstName}
             <br />
             {profile.lastName}
             <span className="text-[var(--amber)]">.</span>
           </h1>
-          <p className="animate-fade-up mb-10 max-w-[560px] text-[1.15rem] font-light text-[var(--text-mid)] [animation-delay:0.35s] [animation-fill-mode:both] opacity-0">
+          <p className="animate-fade-up mb-10 max-w-[560px] text-[1.15rem] font-normal text-[var(--text-mid)] [animation-delay:0.35s] [animation-fill-mode:both] opacity-0">
             {profile.tagline}
           </p>
           <div className="animate-fade-up flex flex-wrap gap-3 [animation-delay:0.5s] [animation-fill-mode:both] opacity-0">
@@ -60,7 +60,7 @@ export default function HomePage() {
               key={stat.label}
               className="rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--bg-3)] p-6"
             >
-              <div className="mb-1 font-[family-name:var(--font-syne)] text-3xl font-extrabold text-[var(--amber)]">
+              <div className="mb-1 font-[family-name:var(--font-syne)] text-3xl font-bold tracking-tight text-[var(--amber)]">
                 {stat.value}
               </div>
               <div className="text-[0.8rem] tracking-wide text-[var(--text-dim)]">

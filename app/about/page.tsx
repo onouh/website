@@ -73,7 +73,7 @@ export default function AboutPage() {
                 key={stat.label}
                 className="rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--bg-3)] p-6"
               >
-                <div className="mb-1 font-[family-name:var(--font-syne)] text-3xl font-extrabold text-[var(--amber)]">
+                <div className="mb-1 font-[family-name:var(--font-syne)] text-3xl font-bold tracking-tight text-[var(--amber)]">
                   {stat.value}
                 </div>
                 <div className="text-[0.8rem] text-[var(--text-dim)]">{stat.label}</div>

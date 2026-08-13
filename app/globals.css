@@ -17,6 +17,9 @@
   --border-2: rgba(255, 255, 255, 0.1);
   --radius: 8px;
   --radius-lg: 16px;
+  --font-syne: var(--font-ibm-plex-sans);
+  --font-dm-sans: var(--font-ibm-plex-sans);
+  --font-jetbrains: var(--font-ibm-plex-mono);
 }
 
 @theme inline {
@@ -29,9 +32,9 @@
   --color-ink-mid: var(--text-mid);
   --color-ink-dim: var(--text-dim);
   --color-line: var(--border);
-  --font-sans: var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif;
-  --font-display: var(--font-syne), ui-sans-serif, sans-serif;
-  --font-mono: var(--font-jetbrains), ui-monospace, monospace;
+  --font-sans: var(--font-ibm-plex-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-ibm-plex-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-ibm-plex-mono), ui-monospace, monospace;
 }
 
 html {

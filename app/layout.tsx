@@ -1,27 +1,23 @@
 import type { Metadata } from "next";
-import { DM_Sans, JetBrains_Mono, Syne } from "next/font/google";
+import { IBM_Plex_Mono, IBM_Plex_Sans } from "next/font/google";
 import { Footer } from "@/components/Footer";
 import { Nav } from "@/components/Nav";
 import { defaultMetadata } from "@/content/seo";
 import { getSiteUrl } from "@/lib/site";
 import "./globals.css";
 
-const syne = Syne({
+const ibmPlexSans = IBM_Plex_Sans({
   subsets: ["latin"],
-  variable: "--font-syne",
-  weight: ["400", "500", "600", "700", "800"],
+  variable: "--font-ibm-plex-sans",
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
 });
 
-const jetbrains = JetBrains_Mono({
+const ibmPlexMono = IBM_Plex_Mono({
   subsets: ["latin"],
-  variable: "--font-jetbrains",
-  weight: ["300", "400", "500"],
-});
-
-const dmSans = DM_Sans({
-  subsets: ["latin"],
-  variable: "--font-dm-sans",
-  weight: ["300", "400", "500"],
+  variable: "--font-ibm-plex-mono",
+  weight: ["400", "500"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -33,7 +29,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${syne.variable} ${jetbrains.variable} ${dmSans.variable} h-full antialiased`}
+      className={`${ibmPlexSans.variable} ${ibmPlexMono.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col bg-canvas font-sans text-ink">
         <a className="skip-link" href="#main">
