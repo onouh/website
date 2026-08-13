@@ -1,0 +1,108 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>
+endobj
+4 0 obj
+<< /Length 2410 >>
+stream
+BT
+/F1 11 Tf
+/F1 18 Tf
+1 0 0 1 50 760 Tm
+(OMAR NOUH) Tj
+/F1 11 Tf
+1 0 0 1 50 742 Tm
+(onouh7@gmail.com | Cairo, EG | linkedin.com/in/onouh | github.com/onouh) Tj
+1 0 0 1 50 726 Tm
+() Tj
+1 0 0 1 50 710 Tm
+(SUMMARY) Tj
+1 0 0 1 50 694 Tm
+(Third-year Computer and Artificial Intelligence Engineering student focused on) Tj
+1 0 0 1 50 678 Tm
+(cross-stack development, from hardware architecture to scalable software.) Tj
+1 0 0 1 50 662 Tm
+(Experienced in C/C++, Python, and C# through OS kernels, enterprise databases,) Tj
+1 0 0 1 50 646 Tm
+(and deep learning pipelines.) Tj
+1 0 0 1 50 630 Tm
+() Tj
+1 0 0 1 50 614 Tm
+(EDUCATION) Tj
+1 0 0 1 50 598 Tm
+(Ain Shams University | Dual Degree ? University of East London | Expected 2028) Tj
+1 0 0 1 50 582 Tm
+(B.Sc. Computer & Artificial Intelligence Engineering | GPA: 3.6) Tj
+1 0 0 1 50 566 Tm
+(College de la Sainte Famille | Baccalaureat Francais | 2024) Tj
+1 0 0 1 50 550 Tm
+(Highest Honors \(Summa Cum Laude / Felicitations du Jury\)) Tj
+1 0 0 1 50 534 Tm
+() Tj
+1 0 0 1 50 518 Tm
+(TECHNICAL SKILLS) Tj
+1 0 0 1 50 502 Tm
+(Languages: C/C++, Python, Java, C#, VHDL, MIPS Assembly, JavaScript, SQL) Tj
+1 0 0 1 50 486 Tm
+(Systems: Memory Management, FOS Kernel, Compiler Design, CPU Scheduling,) Tj
+1 0 0 1 50 470 Tm
+(RTL Design, FPGA, Digital Logic, Hardware-Software Interface) Tj
+1 0 0 1 50 454 Tm
+(Tools: Git/GitHub, Vivado, Logisim, LTSpice, .NET, WinForms, PyTorch,) Tj
+1 0 0 1 50 438 Tm
+(scikit-learn, Microsoft Excel, Office 365) Tj
+1 0 0 1 50 422 Tm
+() Tj
+1 0 0 1 50 406 Tm
+(PROFESSIONAL EXPERIENCE) Tj
+1 0 0 1 50 390 Tm
+(e& | Enterprise Security Intern | Aug 2025) Tj
+1 0 0 1 50 374 Tm
+(Future Career | Business Process Engineering Intern | Jul 2024) Tj
+1 0 0 1 50 358 Tm
+(Dell Technologies | Cloud Infrastructure Trainee | Dec 2021) Tj
+1 0 0 1 50 342 Tm
+() Tj
+1 0 0 1 50 326 Tm
+(PROJECTS) Tj
+1 0 0 1 50 310 Tm
+(Operations & Inventory Tracker | Excel / JavaScript) Tj
+1 0 0 1 50 294 Tm
+(Operating System Kernel \(FOS\) | C) Tj
+1 0 0 1 50 278 Tm
+(Custom Tiny Language Compiler | C/C++) Tj
+1 0 0 1 50 262 Tm
+(Enterprise Cinema Booking System | C# / SQL Server) Tj
+1 0 0 1 50 246 Tm
+(32-Bit Single-Cycle MIPS Processor | VHDL / Vivado) Tj
+1 0 0 1 50 230 Tm
+(Machine Learning Scene Classification | Python / PyTorch \(60.3% val. acc.\)) Tj
+1 0 0 1 50 214 Tm
+() Tj
+1 0 0 1 50 198 Tm
+(Full CV: see /resume on the site. This PDF is a static downloadable snapshot.) Tj
+ET
+endstream
+endobj
+5 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+xref
+0 6
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000115 00000 n 
+0000000241 00000 n 
+0000002703 00000 n 
+trailer
+<< /Size 6 /Root 1 0 R >>
+startxref
+2773
+%%EOF

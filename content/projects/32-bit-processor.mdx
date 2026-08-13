@@ -1,0 +1,19 @@
+---
+slug: 32-bit-processor
+---
+
+## Problem
+
+I wanted a CPU I could simulate instruction-by-instruction: datapath, control, and hazards — not a black-box ISA slide.
+
+## Approach
+
+I designed a modular 32-bit single-cycle MIPS datapath in VHDL with the Xilinx toolchain: custom ALU, register file, and distinct instruction/data memory. A hardwired control unit decodes R, I, and J formats and drives opcode-dependent execution. Testbenches validate branch logic, datapath timing, ALU flags, and structural register hazards.
+
+## Outcome
+
+The processor is simulatable end-to-end, which made RTL, instruction formats, and hazard thinking inspectable rather than assumed.
+
+## Stack
+
+VHDL, Vivado / Xilinx, MIPS, ALU, single-cycle datapath, R/I/J decode.

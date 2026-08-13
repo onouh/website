@@ -1,0 +1,19 @@
+---
+slug: scene-classifier
+---
+
+## Problem
+
+Scene labels on messy images need more than a stock classifier: preprocessing, architecture choice, and honest validation.
+
+## Approach
+
+I built an end-to-end pipeline in Python: distortion-aware preprocessing, categorical encoding, and feature engineering, then fine-tuned convolutional and transformer models (including ConvNeXt-class and Swin-style architectures) in PyTorch with scikit-learn in the evaluation loop.
+
+## Outcome
+
+The pipeline reached **60.3% validation accuracy** on the target structured dataset — a measured baseline, not a leaderboard claim.
+
+## Stack
+
+Python, PyTorch, scikit-learn, transfer learning, CNNs, transformers.

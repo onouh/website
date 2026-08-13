@@ -1,0 +1,19 @@
+---
+slug: fos-kernel
+---
+
+## Problem
+
+Operating systems courses often stop at diagrams. I wanted a kernel I could schedule, page, and fault — not a toy loop.
+
+## Approach
+
+I engineered a custom Multi-Level Feedback Queue (MLFQ) CPU scheduler in C with dynamic priority boosting and aging so processes do not starve across queues. A dynamic kernel heap allocator handles virtual-to-physical translation, frame allocation, and hierarchical page-directory / page-table structures. Memory management uses an Nth-Chance Clock replacement algorithm tied to working-set tracking, page-file I/O, and robust page-fault handlers.
+
+## Outcome
+
+The result is a working kernel path from admission through memory and I/O, with scheduling and paging policies that can be reasoned about independently.
+
+## Stack
+
+C, MLFQ scheduling, virtual memory, hierarchical page tables, Nth-Chance Clock, fault handling.

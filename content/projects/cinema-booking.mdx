@@ -1,0 +1,19 @@
+---
+slug: cinema-booking
+---
+
+## Problem
+
+Booking software fails when the data model is loose: ad-hoc SQL, unclear roles, and races on concurrent orders.
+
+## Approach
+
+I architected a 3NF SQL Server schema of 12 tables with strict primary/foreign keys and role-based access control. Data access is stored procedures and scalar functions only — no ad-hoc SQL. A layered C# .NET WinForms client covers authentication, payment flows, and concurrent order state for the full transaction lifecycle.
+
+## Outcome
+
+The desktop system enforces integrity in the database, not in UI hope, and keeps booking flows concurrent without a query free-for-all.
+
+## Stack
+
+C#, .NET, SQL Server, WinForms, 3NF, RBAC, stored procedures.
