@@ -12,7 +12,7 @@ export const projects: Project[] = [
   {
     slug: "inventory-tracker",
     name: "Operations & Inventory Tracker",
-    icon: "📦",
+    icon: "box",
     lang: "Excel / JavaScript",
     summary:
       "Multi-sheet relational tracking system in Excel for a clothing factory — raw materials, production stages, and order fulfillment — with validation, lookups, and live dashboards.",
@@ -28,7 +28,7 @@ export const projects: Project[] = [
   {
     slug: "fos-kernel",
     name: "Operating System Kernel (FOS)",
-    icon: "⚙️",
+    icon: "cog",
     lang: "C / Virtual Memory",
     summary:
       "Custom MLFQ CPU scheduler with priority boosting and aging, a dynamic kernel heap allocator, hierarchical page tables, Nth-Chance Clock replacement, file I/O, and robust page-fault handlers.",
@@ -44,7 +44,7 @@ export const projects: Project[] = [
   {
     slug: "tiny-compiler",
     name: "Custom Tiny Language Compiler",
-    icon: "🔤",
+    icon: "code",
     lang: "C / C++",
     summary:
       "Compiler frontend from scratch: hand-coded lexer on regular expressions and DFAs, a formal CFG, and a recursive-descent parser that builds syntax trees with error recovery.",
@@ -60,7 +60,7 @@ export const projects: Project[] = [
   {
     slug: "cinema-booking",
     name: "Enterprise Cinema Booking System",
-    icon: "🎬",
+    icon: "film",
     lang: "C# / SQL Server",
     summary:
       "3NF schema of 12 tables with RBAC and stored-procedure data access, plus a layered WinForms app for authentication, payments, and concurrent order state.",
@@ -75,7 +75,7 @@ export const projects: Project[] = [
   {
     slug: "32-bit-processor",
     name: "32-Bit Single-Cycle MIPS Processor",
-    icon: "🔬",
+    icon: "cpu",
     lang: "VHDL / Vivado",
     summary:
       "Modular 32-bit CPU datapath in VHDL with ALU, register file, instruction/data memory, a hardwired control unit for R/I/J formats, and testbenches for branch logic and hazards.",
@@ -90,7 +90,7 @@ export const projects: Project[] = [
   {
     slug: "scene-classifier",
     name: "Machine Learning Scene Classification",
-    icon: "🖼️",
+    icon: "image",
     lang: "Python / PyTorch",
     summary:
       "End-to-end scene classification pipeline with preprocessing, feature engineering, and fine-tuning of convolutional and transformer models — 60.3% validation accuracy.",

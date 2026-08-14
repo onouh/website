@@ -1,25 +1,48 @@
 @import "tailwindcss";
 
 :root {
-  --bg: #05070c;
-  --bg-2: #0a1628;
-  --bg-3: #122038;
-  --quantum: #2f6bff;
+  color-scheme: light;
+  --bg: #f7f8fa;
+  --bg-2: #eef1f6;
+  --bg-3: #e4e9f2;
+  --quantum: #1e4ecc;
   --amber: var(--quantum);
-  --amber-dim: #1e4ecc;
-  --amber-glow: rgba(47, 107, 255, 0.08);
-  --blue: #5b8aff;
+  --amber-dim: #163ca3;
+  --amber-glow: rgba(30, 78, 204, 0.1);
+  --blue: #2f6bff;
   --red: #e11d2e;
-  --text: #f7f8fa;
-  --text-mid: #8b96ab;
-  --text-dim: #5a6578;
-  --border: rgba(255, 255, 255, 0.06);
-  --border-2: rgba(255, 255, 255, 0.1);
+  --text: #05070c;
+  --text-mid: #3d4a5c;
+  --text-dim: #6b7380;
+  --border: rgba(10, 22, 40, 0.08);
+  --border-2: rgba(10, 22, 40, 0.14);
+  --nav-bg: rgba(247, 248, 250, 0.88);
+  --grid-line: rgba(10, 22, 40, 0.06);
   --radius: 8px;
   --radius-lg: 16px;
   --font-syne: var(--font-ibm-plex-sans);
   --font-dm-sans: var(--font-ibm-plex-sans);
   --font-jetbrains: var(--font-ibm-plex-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --bg: #05070c;
+    --bg-2: #0a1628;
+    --bg-3: #122038;
+    --quantum: #2f6bff;
+    --amber-dim: #1e4ecc;
+    --amber-glow: rgba(47, 107, 255, 0.08);
+    --blue: #5b8aff;
+    --text: #f7f8fa;
+    --text-mid: #8b96ab;
+    --text-dim: #5a6578;
+    --border: rgba(255, 255, 255, 0.06);
+    --border-2: rgba(255, 255, 255, 0.1);
+    --nav-bg: rgba(5, 7, 12, 0.88);
+    --grid-line: rgba(255, 255, 255, 0.025);
+  }
 }
 
 @theme inline {
@@ -133,8 +156,8 @@ body {
   position: absolute;
   inset: 0;
   background-image:
-    linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
   background-size: 60px 60px;
   mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, black 30%, transparent 80%);
 }
@@ -152,6 +175,14 @@ body {
 
 .animate-fade-up {
   animation: fade-up 0.7s ease forwards;
+}
+
+/* Paul Rand 8-bar IBM wordmark (slab serif, eight even stripes) */
+.ibm-wordmark {
+  display: block;
+  height: 1.75rem;
+  width: auto;
+  color: var(--text);
 }
 
 @media (prefers-reduced-motion: reduce) {

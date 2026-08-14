@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ProjectIcon } from "@/components/ProjectIcon";
 import type { Project } from "@/content/types";
 
 export function ProjectCard({ project }: { project: Project }) {
@@ -12,8 +13,8 @@ export function ProjectCard({ project }: { project: Project }) {
         className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-[var(--amber)] to-transparent opacity-0 transition-opacity group-hover:opacity-100"
       />
       <div className="flex items-start justify-between">
-        <span className="flex h-10 w-10 items-center justify-center rounded-lg border border-[rgba(47,107,255,0.2)] bg-[var(--amber-glow)] text-lg">
-          {project.icon}
+        <span className="flex h-10 w-10 items-center justify-center rounded-lg border border-[rgba(47,107,255,0.2)] bg-[var(--amber-glow)] text-[var(--quantum)]">
+          <ProjectIcon id={project.icon} />
         </span>
         <span className="rounded border border-[var(--border)] px-2 py-1 font-[family-name:var(--font-jetbrains)] text-[0.68rem] tracking-wide text-[var(--text-dim)]">
           {project.lang}

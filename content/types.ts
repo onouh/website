@@ -67,10 +67,12 @@ export type SkillGroup = {
 
 export type ProjectFilterId = "os" | "compilers" | "fpga" | "ml" | "software";
 
+export type ProjectIconId = "box" | "cog" | "code" | "film" | "cpu" | "image";
+
 export type Project = {
   slug: string;
   name: string;
-  icon: string;
+  icon: ProjectIconId;
   lang: string;
   summary: string;
   tags: string[];

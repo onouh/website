@@ -28,7 +28,7 @@ export function Nav() {
   }, [open]);
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50 border-b border-[var(--border)] bg-[rgba(12,14,18,0.85)] backdrop-blur-md">
+    <header className="fixed inset-x-0 top-0 z-50 border-b border-[var(--border)] bg-[var(--nav-bg)] backdrop-blur-md">
       <nav
         className="flex items-center justify-between px-6 py-4 md:px-12"
         aria-label="Primary"

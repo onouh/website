@@ -1,3 +1,4 @@
+import { IbmWordmark } from "@/components/IbmWordmark";
 import { profile } from "@/content/profile";
 
 export function Footer() {
@@ -5,8 +6,8 @@ export function Footer() {
 
   return (
     <footer className="mt-auto flex flex-wrap items-center justify-between gap-4 border-t border-[var(--border)] px-6 py-8 md:px-12">
-      <p className="font-[family-name:var(--font-syne)] text-base font-bold text-[var(--text)]">
-        {profile.name}
+      <p className="leading-none">
+        <IbmWordmark name={profile.name} />
       </p>
       <div className="flex gap-6">
         <a
