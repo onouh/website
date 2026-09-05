@@ -39,7 +39,11 @@ export function ContactForm() {
           className="rounded-[var(--radius)] border border-[var(--border-2)] bg-[var(--bg-3)] px-3 py-2 text-[var(--text)]"
         />
       </label>
-      <button type="submit" className="btn btn-primary w-fit" disabled={pending}>
+      <button
+        type="submit"
+        className="btn btn-primary w-fit disabled:opacity-60"
+        disabled={pending}
+      >
         {pending ? "Sending…" : "Send message"}
       </button>
       {state?.ok ? (

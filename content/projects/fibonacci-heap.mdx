@@ -1,0 +1,25 @@
+---
+slug: fibonacci-heap
+---
+
+## Problem
+
+The Fibonacci heap is famous on paper — O(1) amortized insert, decrease-key, and merge — and infamous in practice: pointer-heavy, easy to get subtly wrong, and hard to debug. Most implementations stop at a console test harness. I wanted the full structure *and* a way to actually watch it work.
+
+## Approach
+
+The core is a templated C++17 `FibonacciHeap` supporting any comparable type, with the complete operation surface: `insert` (O(1) amortized), `getMin` (O(1)), `extractMin` (O(log n) amortized with consolidate), `decreaseKey` with cascading cuts, `deleteNode`, and `merge`. Node state — parent, child, left/right sibling links, degree, and mark flag — is maintained through every operation, with careful memory management and no leaks.
+
+Two Qt 6 (Widgets) applications sit on top. **FibonacciHeapGUI** is an interactive visualizer: click any node to select it for decrease-key or delete, watch extract-min animate its consolidation, and control playback with speed settings and pause/resume. Color coding carries meaning — gold for the minimum, orange for marked nodes, blue for children, red for selection — and dashed lines show sibling links while arrows show parent-child edges. Tooltips surface key, value, degree, and mark status on hover.
+
+**TaskManagerGUI** applies the same heap to a real priority-queue problem: an emergency-care patient manager where triage priority determines extraction order, demonstrating that the amortized guarantees translate into a responsive queue under churn.
+
+Both apps ship in one CMake build (`qt6-base-dev`, C++17), producing `FibonacciHeapGUI` and `TaskManagerGUI` binaries, with a validation script that checks the GUI controls, animation integration, and interactive features.
+
+## Outcome
+
+A textbook data structure made tangible: full amortized guarantees verified through interactive visualization, plus a practical application showing where O(1) decrease-key actually matters.
+
+## Stack
+
+C++17, CMake, Qt 6 Widgets, amortized analysis, templated containers.

@@ -5,7 +5,7 @@ import { experienceChronological } from "@/content/experience";
 
 export const metadata: Metadata = {
   title: "Experience",
-  description: "Internships and training — enterprise security, process engineering, and cloud infrastructure.",
+  description: "Internships and training — artificial intelligence, enterprise security, process engineering, cloud infrastructure, and marketing.",
 };
 
 export default function ExperiencePage() {

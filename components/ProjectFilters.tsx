@@ -24,7 +24,7 @@ export function ProjectFilters({
             key={item.id}
             href={href}
             scroll={false}
-            className={`rounded-[var(--radius)] border px-3 py-1.5 font-[family-name:var(--font-jetbrains)] text-xs uppercase tracking-wide transition-colors ${
+            className={`filter-chip rounded-[var(--radius)] border px-3 py-1.5 font-[family-name:var(--font-jetbrains)] text-xs uppercase tracking-wide transition-[border-color,background-color,color,transform] duration-150 active:scale-95 ${
               selected
                 ? "border-[var(--amber-dim)] bg-[var(--amber-glow)] text-[var(--amber)]"
                 : "border-[var(--border)] text-[var(--text-mid)] hover:border-[var(--amber-dim)] hover:text-[var(--text)]"

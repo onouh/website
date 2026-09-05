@@ -1,0 +1,25 @@
+---
+slug: veripay
+---
+
+## Problem
+
+Payment fraud moves in milliseconds, but fraud analysis traditionally runs as a batch job. I wanted a platform where scoring, alerting, investigation, and retraining all happen in real time — without giving up auditability or the ability to explain *why* a transaction was flagged.
+
+## Approach
+
+I architected the platform as 26 FastAPI/gRPC microservices, one per diagrammed component, with protobuf contracts as the shared boundary. Transaction features stream through Apache Kafka into PyFlink aggregation jobs and land in a Redis feature store, where XGBoost and Isolation Forest models score risk with SHAP-style attribution.
+
+The data plane is split into five logical PostgreSQL databases — customer, bank, fraud-ops, merchant, and mobile — because the analyst-facing fraud-operations workload has its own lifecycle. Cross-domain relationships use stable IDs and API contracts rather than foreign keys, since PostgreSQL cannot enforce them across databases; SQL migrations for each domain live under `datasets/migrations/`.
+
+On top of scoring sits the full fraud-operations loop: an alert queue, a transaction-detail workspace with evidence, feature, and timeline tabs, customer profiles, an analyst feedback panel, and a retraining path. A governed local-LLM boundary (deterministic by default, vLLM-compatible when configured) produces analyst explanations without letting prompts escape the platform.
+
+Everything runs locally with a single `make up`: Docker Compose brings up Kafka, Redis, PostgreSQL, and all services, migrates the five databases, and the React analyst console is fully navigable against MSW mocks of the frozen OpenAPI contracts even without a backend.
+
+## Outcome
+
+A complete, demonstrable fraud platform: real-time scoring feeding an analyst workflow that closes the loop back into model retraining, with `make test` (pytest + vitest) and `make lint` (ruff + mypy + eslint) gating the whole monorepo.
+
+## Stack
+
+Python 3.12, FastAPI, gRPC (protobuf/buf), Apache Kafka, PyFlink, Redis, PostgreSQL 16, XGBoost, scikit-learn, React 18 + TypeScript, Docker Compose, Terraform + Kubernetes/Helm.

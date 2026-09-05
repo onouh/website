@@ -3,6 +3,18 @@ import type { ExperienceItem } from "./types";
 /** Roles as listed in Resume.pages. */
 export const experience: ExperienceItem[] = [
   {
+    company: "Dell Technologies",
+    role: "Artificial Intelligence Engineer Intern",
+    date: "Aug 2026",
+    sortKey: "2026-08",
+    description:
+      "Analyzed enterprise cloud database architectures, evaluating hardware-software integration constraints across Dell infrastructure platforms.",
+    bullets: [
+      "Analyzed enterprise cloud database architectures, evaluating hardware-software integration constraints across Dell infrastructure platforms.",
+      "Developed a foundational understanding of high-availability cloud deployments, bridging physical hardware limitations with scalable software solutions.",
+    ],
+  },
+  {
     company: "e&",
     role: "Enterprise Security Intern",
     date: "Aug 2025",
@@ -36,6 +48,18 @@ export const experience: ExperienceItem[] = [
     bullets: [
       "Analyzed enterprise cloud database architectures, evaluating hardware-software integration constraints across Dell infrastructure platforms.",
       "Developed a foundational understanding of high-availability cloud deployments, bridging physical hardware limitations with scalable software solutions.",
+    ],
+  },
+  {
+    company: "Dell Technologies",
+    role: "Marketing Star Bootcamp Intern",
+    date: "Aug 2022",
+    sortKey: "2022-08",
+    description:
+      "Learned how to market the Dell Technologies brand and product portfolio, culminating in a pitch to help strengthen the Dell ecosystem.",
+    bullets: [
+      "Learned how to market the Dell Technologies brand and its products across the portfolio.",
+      "Delivered a final presentation pitching an initiative to help strengthen the Dell ecosystem.",
     ],
   },
 ];

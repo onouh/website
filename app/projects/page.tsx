@@ -8,13 +8,14 @@ import type { ProjectFilterId } from "@/content/types";
 export const metadata: Metadata = {
   title: "Projects",
   description:
-    "Filterable engineering work: OS kernels, compilers, FPGA processors, ML pipelines, and software systems.",
+    "Filterable engineering work: distributed inference engines, fraud-detection platforms, production SaaS, OS kernels, compilers, FPGA processors, and ML pipelines.",
 };
 
 const filters = new Set<ProjectFilterId>([
   "os",
   "compilers",
   "fpga",
+  "systems",
   "ml",
   "software",
 ]);

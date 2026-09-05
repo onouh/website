@@ -1,0 +1,25 @@
+---
+slug: omnitaps
+---
+
+## Problem
+
+Small hospitality businesses need guest Wi-Fi portals, digital menus, reviews, and a website — but off-the-shelf tools charge per feature and own the customer relationship. I wanted one platform a café could run itself: guest-facing, multi-tenant, and cheap enough to survive on Vercel's Hobby plan.
+
+## Approach
+
+Omnitaps is a React 19 + Vite 8 SPA with Postgres (Prisma) holding product data and Supabase Auth plus enterprise/captive tables behind it. The interesting constraint was Vercel Hobby's 12-function cap: all production APIs live in **one** catch-all Serverless Function, `api/[...path].js`. Handlers sit in `api/_lib/handlers/` and dispatch from a route table (`api/_lib/routeTable.js`); unmatched `/api/*` paths return a JSON 404 instead of falling through to the SPA. The catch-all runs with `bodyParser: false` and `maxDuration: 30` so Stripe webhooks can verify raw bodies.
+
+The captive Wi-Fi flow is the deepest feature: guests authenticate on the network, receive OTP codes by email (Resend) or SMS (Twilio), and pay through Stripe checkout — with webhooks pointing at `/api/v1/captive/checkout` to confirm. A `CAPTIVE_OTP_ECHO` flag echoes codes in dev so demos work without provider accounts.
+
+Tenant theming is scoped by a `CafeThemeGate`, with chrome portaled and fixed so each café's brand survives navigation. Resilience matters for demos and operations alike: if Prisma is down or the demo tenant is missing, guest café APIs fall back to a static demo module (`api/_lib/demoCafe.js`), while `/admin` still demands a real database.
+
+Deployment is one command in either direction: `npm run setup` installs, pushes the Prisma schema, and seeds a demo tenant + admin; `npm run launch` builds, syncs env to Vercel, and deploys production. A multi-arch Docker image (linux/amd64 + arm64) ships on GHCR, with `VITE_*` values handled as build args and secrets only ever supplied at runtime via `--env-file`.
+
+## Outcome
+
+A live, production platform at [omnitaps.vercel.app](https://omnitaps.vercel.app) with guest demos (`/demo`, `/menu/demo`, `/r/demo/wifi`), an operator dashboard (`/demo/dashboard`), Stripe-backed captive Wi-Fi, and a Docker path for self-hosting — all on a free-tier hosting budget.
+
+## Stack
+
+React 19, Vite 8, TypeScript, Prisma + PostgreSQL, Supabase Auth, Stripe (checkout + webhooks), Resend, Twilio, Vercel Serverless Functions, Docker Buildx, GHCR.

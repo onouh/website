@@ -1,0 +1,25 @@
+---
+slug: vehicle-rental-system
+---
+
+## Problem
+
+Rental businesses run on spreadsheets. I wanted a desktop application that handles the full workflow — fleet, customers, reservations — with proper authentication, persistence, and architecture, in a systems language where nothing is hidden behind a framework.
+
+## Approach
+
+The application follows a strict MVC decomposition in C++17 with Qt 6. Views (login window, main dashboard with sidebar navigation, forms, reservation views) render the state; controllers own the workflows — `AuthManager` for registration/login with role assignment, `RentalManager` for the business logic; models centralize persistence in a `DatabaseManager` singleton with typed CRUD for every entity.
+
+SQLite backs three tables — Users, Vehicles, Reservations — created automatically on first run with foreign-key constraints for integrity and sample data pre-populated. All queries go through prepared statements, and passwords are stored as SHA-256 hashes; the project passed CodeQL review with zero vulnerabilities.
+
+The reservation engine checks availability before booking, computes cost as rate × days, and tracks each reservation through its lifecycle (active, completed, cancelled). Two roles, Admin and Customer, see different views: admins manage the fleet, customers browse, book, and track their own reservations.
+
+The UI is a professional dark QSS theme with responsive tables, search and filter by type/brand/model/status, and real-time availability tracking. Six PNG screenshots of every window were captured with a custom Qt tool against an `xvfb` virtual display, and the repo documents architecture (`DESIGN.md`, `ARCHITECTURE.txt`) alongside per-role GUI guides.
+
+## Outcome
+
+A complete, tested MVC application — database init, authentication, vehicle CRUD, reservation lifecycle — with a clean security scan and documentation a new developer can follow end to end.
+
+## Stack
+
+C++17, Qt 6 (Widgets + Sql), SQLite, CMake, MVC + Singleton patterns, SHA-256, QSS.

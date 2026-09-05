@@ -5,7 +5,7 @@ export function Footer() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="mt-auto flex flex-wrap items-center justify-between gap-4 border-t border-[var(--border)] px-6 py-8 md:px-12">
+    <footer className="mt-auto flex flex-wrap items-center justify-between gap-4 border-t border-[var(--border)] px-[var(--gutter)] py-8">
       <p className="leading-none">
         <IbmWordmark name={profile.name} />
       </p>

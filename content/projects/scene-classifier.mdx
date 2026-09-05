@@ -4,16 +4,22 @@ slug: scene-classifier
 
 ## Problem
 
-Scene labels on messy images need more than a stock classifier: preprocessing, architecture choice, and honest validation.
+17-way indoor scene-style classification on messy competition imagery: class imbalance, small effective batches, and backbones that disagree. A single stock fine-tune plateaus fast — the gains live in the training loop, the loss function, and the ensemble.
 
 ## Approach
 
-I built an end-to-end pipeline in Python: distortion-aware preprocessing, categorical encoding, and feature engineering, then fine-tuned convolutional and transformer models (including ConvNeXt-class and Swin-style architectures) in PyTorch with scikit-learn in the evaluation loop.
+I built a PyTorch Lightning pipeline around a swappable backbone registry — ResNet-50, EfficientNet-B4, five ConvNeXt sizes, and Swin Tiny/Small — with a custom classification head (LayerNorm → GELU MLP) that adapts to each backbone's feature geometry: adaptive pooling for CNN maps, mean-over-tokens for sequence models like Swin.
+
+Training is two-phase: the backbone starts frozen while only the head trains, then an `UnfreezeBackboneCallback` unfreezes it at a configured epoch for careful full fine-tuning with a 100× LR differential (backbone 1e-5, head 3e-4) under a warmup + cosine LambdaLR schedule. When a checkpoint lacks a matching head, a shape-filtered loader strips classifier tensors and loads only backbone weights that match by name and shape.
+
+The custom `StyleAwareLoss` combines label-smoothed cross-entropy with an optional **Gram-matrix texture loss** — Gram matrices computed for both CNN `(B, C, H, W)` and token-sequence `(B, N, D)` feature layouts — pulling feature activations toward those of horizontally flipped views to encourage texture-consistent representations.
+
+For the leaderboard, a weighted ensemble script loads the best checkpoints (Swin-Small 54.8%, ConvNeXt-Base 60.3% val accuracy) behind their correct head architectures, applies 7-view test-time augmentation per model per image, and blends weight-normalized probabilities. Everything is tracked in Weights & Biases with 16-mixed precision, gradient clipping, and early stopping.
 
 ## Outcome
 
-The pipeline reached **60.3% validation accuracy** on the target structured dataset — a measured baseline, not a leaderboard claim.
+ConvNeXt-Base reached **60.3% validation accuracy** on the 17-class task; the TTA ensemble combined the strongest checkpoints into the final submission — a measured, reproducible result, not a leaderboard claim.
 
 ## Stack
 
-Python, PyTorch, scikit-learn, transfer learning, CNNs, transformers.
+Python, PyTorch, PyTorch Lightning, torchvision v2, torchmetrics, Gram-matrix style loss, TTA ensembling, Weights & Biases.

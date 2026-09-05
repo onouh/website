@@ -3,6 +3,7 @@ import { IBM_Plex_Mono, IBM_Plex_Sans, IBM_Plex_Serif } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { Footer } from "@/components/Footer";
 import { Nav } from "@/components/Nav";
+import { PageTransition } from "@/components/PageTransition";
 import { defaultMetadata } from "@/content/seo";
 import { getSiteUrl } from "@/lib/site";
 import "./globals.css";
@@ -45,7 +46,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         </a>
         <Nav />
         <main id="main" tabIndex={-1} className="flex flex-1 flex-col pt-[72px]">
-          {children}
+          <PageTransition>{children}</PageTransition>
         </main>
         <Footer />
         <Analytics />

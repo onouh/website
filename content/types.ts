@@ -65,9 +65,26 @@ export type SkillGroup = {
   items: string[];
 };
 
-export type ProjectFilterId = "os" | "compilers" | "fpga" | "ml" | "software";
+export type ProjectFilterId =
+  | "os"
+  | "compilers"
+  | "fpga"
+  | "systems"
+  | "ml"
+  | "software";
 
-export type ProjectIconId = "box" | "cog" | "code" | "film" | "cpu" | "image";
+export type ProjectIconId =
+  | "box"
+  | "cog"
+  | "code"
+  | "film"
+  | "cpu"
+  | "image"
+  | "shield"
+  | "layers"
+  | "globe"
+  | "graph"
+  | "car";
 
 export type Project = {
   slug: string;
@@ -79,4 +96,5 @@ export type Project = {
   filters: ProjectFilterId[];
   featured?: boolean;
   bullets?: string[];
+  repo?: string;
 };

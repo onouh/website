@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { navItems } from "@/content/nav";
 
 function isActive(pathname: string, href: string) {
@@ -13,10 +13,15 @@ function isActive(pathname: string, href: string) {
 export function Nav() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
 
+  // Scroll edge effect: separate only once content passes underneath (§12).
   useEffect(() => {
-    setOpen(false);
-  }, [pathname]);
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   useEffect(() => {
     if (!open) return;
@@ -27,10 +32,30 @@ export function Nav() {
     return () => window.removeEventListener("keydown", onKey);
   }, [open]);
 
+  // Outside-tap dismissal: any pointerdown that starts outside the header
+  // (menu button included via its own toggle) closes the menu. Covers touch
+  // and mouse; pointerdown runs before the button's click-toggle, so a tap
+  // on the button closes-and-reopens, which the toggle then resolves to
+  // closed — net effect: outside taps dismiss, button taps toggle normally.
+  const headerRef = useRef<HTMLElement | null>(null);
+  useEffect(() => {
+    if (!open) return;
+    const onPointerDownOutside = (event: PointerEvent) => {
+      if (!headerRef.current?.contains(event.target as Node)) setOpen(false);
+    };
+    document.addEventListener("pointerdown", onPointerDownOutside);
+    return () =>
+      document.removeEventListener("pointerdown", onPointerDownOutside);
+  }, [open]);
+
   return (
-    <header className="fixed inset-x-0 top-0 z-50 border-b border-[var(--border)] bg-[var(--nav-bg)] backdrop-blur-md">
+    <header
+      ref={headerRef}
+      className="site-nav fixed inset-x-0 top-0 z-50 bg-[var(--nav-bg)] backdrop-blur-md"
+      data-scrolled={scrolled ? "" : undefined}
+    >
       <nav
-        className="flex items-center justify-between px-6 py-4 md:px-12"
+        className="flex items-center justify-between px-[var(--gutter)] py-4"
         aria-label="Primary"
       >
         <Link
@@ -58,7 +83,7 @@ export function Nav() {
         </ul>
         <button
           type="button"
-          className="inline-flex h-10 w-10 items-center justify-center rounded-[var(--radius)] border border-[var(--border-2)] text-[var(--text)] md:hidden"
+          className="nav-burger inline-flex h-10 w-10 items-center justify-center rounded-[var(--radius)] border border-[var(--border-2)] text-[var(--text)] transition-transform duration-100 ease-out active:scale-95 md:hidden"
           aria-expanded={open}
           aria-controls="mobile-nav"
           onClick={() => setOpen((value) => !value)}
@@ -78,13 +103,14 @@ export function Nav() {
       {open ? (
         <ul
           id="mobile-nav"
-          className="flex flex-col gap-1 border-t border-[var(--border)] px-6 py-4 md:hidden"
+          className="menu-panel flex flex-col gap-1 px-[var(--gutter)] py-4 md:hidden"
         >
           {navItems.map((item) => (
             <li key={item.href}>
               <Link
                 href={item.href}
-                className={`block py-2 text-sm uppercase tracking-[0.06em] ${
+                onClick={() => setOpen(false)}
+                className={`mobile-nav-link block py-2 text-sm uppercase tracking-[0.06em] ${
                   isActive(pathname, item.href)
                     ? "text-[var(--amber)]"
                     : "text-[var(--text-mid)]"

@@ -2,11 +2,18 @@ import Link from "next/link";
 import { ProjectIcon } from "@/components/ProjectIcon";
 import type { Project } from "@/content/types";
 
-export function ProjectCard({ project }: { project: Project }) {
+export function ProjectCard({
+  project,
+  tabIndex,
+}: {
+  project: Project;
+  tabIndex?: number;
+}) {
   return (
     <Link
       href={`/projects/${project.slug}`}
-      className="group relative flex flex-col gap-4 overflow-hidden rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--bg-2)] p-7 transition-[border-color,transform] hover:-translate-y-0.5 hover:border-[rgba(47,107,255,0.25)] motion-reduce:transform-none"
+      tabIndex={tabIndex}
+      className="group relative flex flex-col gap-4 overflow-hidden rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--bg-2)] p-7 transition-[border-color,transform] hover:-translate-y-0.5 hover:border-[rgba(47,107,255,0.25)] active:translate-y-0 active:scale-[0.99] motion-reduce:transform-none"
     >
       <span
         aria-hidden
@@ -36,6 +43,26 @@ export function ProjectCard({ project }: { project: Project }) {
           </span>
         ))}
       </div>
+      {project.repo ? (
+        <span
+          aria-hidden
+          className="inline-flex items-center gap-1.5 font-[family-name:var(--font-jetbrains)] text-[0.72rem] text-[var(--text-dim)] transition-colors group-hover:text-[var(--amber)]"
+        >
+          GitHub
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="h-3 w-3"
+          >
+            <path d="M7 17 17 7" />
+            <path d="M9 7h8v8" />
+          </svg>
+        </span>
+      ) : null}
     </Link>
   );
 }

@@ -19,8 +19,8 @@ export const profile: Profile = {
     "Active in Competitive Programming, Model United Nations (MUN), and Triathlons — all of which demand the same rigor I bring to code.",
   stats: [
     { value: "3.6", label: "GPA at Ain Shams University" },
-    { value: "3+", label: "Professional internships completed" },
-    { value: "6+", label: "Engineering projects built" },
+    { value: "5+", label: "Professional internships completed" },
+    { value: "12+", label: "Engineering projects built" },
     { value: "3", label: "Languages spoken natively" },
   ],
   languages: [

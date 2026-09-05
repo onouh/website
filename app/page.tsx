@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ProjectCard } from "@/components/ProjectCard";
+import { FeaturedCarousel } from "@/components/FeaturedCarousel";
 import { featuredProjects } from "@/content/projects";
 import { profile } from "@/content/profile";
 
@@ -8,7 +8,7 @@ export default function HomePage() {
 
   return (
     <>
-      <section className="relative flex min-h-[calc(100vh-72px)] flex-col justify-center overflow-hidden px-6 py-24 md:px-12">
+      <section className="relative flex min-h-[calc(100vh-72px)] flex-col justify-center overflow-hidden px-[var(--gutter)] py-[var(--space-hero)]">
         <div className="hero-grid-bg" aria-hidden />
         <div
           aria-hidden
@@ -53,7 +53,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="bg-[var(--bg-2)] px-6 py-20 md:px-12">
+      <section className="bg-[var(--bg-2)] px-[var(--gutter)] py-[var(--space-section)]">
         <div className="mx-auto grid max-w-[1000px] grid-cols-2 gap-4 md:grid-cols-4">
           {profile.stats.map((stat) => (
             <div
@@ -71,7 +71,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="px-6 py-20 md:px-12">
+      <section className="px-[var(--gutter)] py-[var(--space-section)]">
         <div className="mx-auto max-w-[1000px]">
           <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
             <div>
@@ -84,11 +84,7 @@ export default function HomePage() {
               All projects →
             </Link>
           </div>
-          <div className="grid gap-6 md:grid-cols-3">
-            {featured.map((project) => (
-              <ProjectCard key={project.slug} project={project} />
-            ))}
-          </div>
+          <FeaturedCarousel projects={featured} />
         </div>
       </section>
     </>

@@ -23,6 +23,18 @@
   --font-syne: var(--font-ibm-plex-sans);
   --font-dm-sans: var(--font-ibm-plex-sans);
   --font-jetbrains: var(--font-ibm-plex-mono);
+
+  /* ─── Fluid spacing scale ─────────────────────────────────────────
+     Continuous interpolation between viewport sizes instead of steps at
+     breakpoints (§15: layout breathes proportionally). Interpolated
+     between a 375px phone and a 1280px desktop, clamped beyond. */
+  /* Page side gutters: 20 → 48px (was a hard 24 → 48 step at md). */
+  --gutter: clamp(1.25rem, 0.5rem + 3vw, 3rem);
+  /* Section rhythm: 64 → 112px. Small screens get calmer padding that
+     suits their viewport; large screens get grander air. */
+  --space-section: clamp(4rem, 2.5rem + 6vw, 7rem);
+  /* Hero-scale vertical padding: 80 → 144px. */
+  --space-hero: clamp(5rem, 3rem + 9vw, 9rem);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -58,11 +70,43 @@
   --font-sans: var(--font-ibm-plex-sans), ui-sans-serif, system-ui, sans-serif;
   --font-display: var(--font-ibm-plex-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-ibm-plex-mono), ui-monospace, monospace;
+
+  /* ─── Fluid type scale ─────────────────────────────────────────────
+     Overriding the default --text-* tokens makes every text-* utility
+     interpolate continuously between 375px and 1280px instead of only
+     changing at breakpoints. Line-height pairs scale inversely with size
+     (§15: tight on large text, looser on small). Tiny labels (xs) stay
+     fixed — legibility beats proportionality at that scale. */
+  --text-xs: 0.75rem;
+  --text-xs--line-height: 1.4;
+  --text-sm: clamp(0.8rem, 0.77rem + 0.15vw, 0.875rem);
+  --text-sm--line-height: 1.45;
+  --text-base: clamp(0.9375rem, 0.9rem + 0.2vw, 1rem);
+  --text-base--line-height: 1.55;
+  --text-lg: clamp(1.05rem, 1rem + 0.25vw, 1.125rem);
+  --text-lg--line-height: 1.5;
+  --text-xl: clamp(1.15rem, 1.05rem + 0.5vw, 1.25rem);
+  --text-xl--line-height: 1.35;
+  --text-2xl: clamp(1.35rem, 1.18rem + 0.85vw, 1.5rem);
+  --text-2xl--line-height: 1.25;
+  --text-3xl: clamp(1.6rem, 1.32rem + 1.4vw, 2rem);
+  --text-3xl--line-height: 1.18;
+  --text-4xl: clamp(2rem, 1.57rem + 2.15vw, 2.5rem);
+  --text-4xl--line-height: 1.12;
+  --text-5xl: clamp(2.5rem, 1.86rem + 3.2vw, 3.5rem);
+  --text-5xl--line-height: 1.05;
 }
 
 html {
   scroll-behavior: smooth;
   background: var(--bg);
+}
+
+/* Transient off-screen page transforms (route transitions) must not
+   create horizontal scrollbars; clip without becoming a scroll container. */
+html,
+body {
+  overflow-x: clip;
 }
 
 body {
@@ -116,9 +160,20 @@ body {
   color: #fff;
 }
 
-.btn-primary:hover {
-  background: #f1283a;
-  transform: translateY(-1px);
+/* Hover styling gated on hover-capable pointers: on touch, :hover latches
+   after a tap and the button would stay visually lifted (§16 — the interface
+   must not lie about state). Touch feedback is covered by .btn:active. */
+@media (hover: hover) {
+  .btn-primary:hover {
+    background: #f1283a;
+    transform: translateY(-1px);
+  }
+}
+
+/* Press feedback lives on pointer-down, not release (fluid interfaces §1) */
+.btn:active {
+  transform: translateY(0) scale(0.97);
+  transition-duration: 100ms;
 }
 
 .btn-outline {
@@ -127,9 +182,18 @@ body {
   border-color: var(--border-2);
 }
 
-.btn-outline:hover {
-  border-color: var(--quantum);
-  color: var(--quantum);
+@media (hover: hover) {
+  .btn-outline:hover {
+    border-color: var(--quantum);
+    color: var(--quantum);
+  }
+}
+
+/* Reduced motion still gets the hover color, but no lift. */
+@media (hover: hover) and (prefers-reduced-motion: reduce) {
+  .btn-primary:hover {
+    transform: none;
+  }
 }
 
 .section-label {
@@ -162,6 +226,135 @@ body {
   mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, black 30%, transparent 80%);
 }
 
+/* Featured carousel depth hierarchy (§12): the focused slide sits forward;
+   neighbors recede with a subtle scale + dim. State-driven, so CSS
+   transitions are fine here (the no-CSS-transitions rule targets
+   gesture-driven motion); during an active drag, inline styles from the
+   pointer handlers take over with transitions disabled. Same curve both
+   ways so dim and restore are mirror images (§7). */
+.carousel-slide {
+  transition:
+    transform 420ms cubic-bezier(0.32, 0.72, 0, 1),
+    opacity 420ms cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.carousel-slide[data-neighbor] {
+  transform: scale(0.955);
+  opacity: 0.78;
+}
+
+.carousel-track[data-dragging] .carousel-slide {
+  transition: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .carousel-slide {
+    transition: opacity 200ms ease;
+  }
+
+  .carousel-slide[data-neighbor] {
+    transform: none;
+  }
+
+  /* Reduced motion never auto-advances, so the control would be dead
+     chrome — hide it. */
+  .carousel-auto-toggle {
+    display: none;
+  }
+}
+
+/* ─── Coarse-pointer affordances ────────────────────────────────────────
+   Touch devices (primary input = coarse pointer): hit targets at or near
+   Apple's 44pt guideline and WCAG 2.5.8's 24px minimum, without changing
+   the visual design for mouse users. Two techniques: pseudo-element hit
+   expansion (visuals pixel-identical, zero layout shift) for the small
+   round controls, and real size growth where a larger visible control
+   *is* the better touch design (§16 Flexibility). */
+@media (pointer: coarse) {
+  /* Hit expansion: ::after stretches the tappable region past the visual
+     box. Adjacent dots end up ~2px overlapped — unavoidable when 10px
+     controls sit 18px apart, and harmless within one control family. */
+  .carousel-dot,
+  .carousel-auto-toggle {
+    position: relative;
+  }
+
+  .carousel-dot::after,
+  .carousel-auto-toggle::after {
+    content: "";
+    position: absolute;
+    inset: -7px;
+  }
+
+  /* A real drag surface has no business showing a grab cursor on touch —
+     there is no cursor. Overrides the fine-pointer-only Tailwind classes
+     (this block comes later in the cascade). */
+  .carousel-viewport {
+    cursor: auto;
+  }
+
+  /* Visible growth: touch controls should look touchable too. */
+  .filter-chip,
+  .related-chip {
+    padding: 0.5rem 1rem;
+  }
+
+  .mobile-nav-link {
+    padding-top: 0.625rem;
+    padding-bottom: 0.625rem;
+  }
+
+  .nav-burger {
+    height: 2.75rem;
+    width: 2.75rem;
+  }
+
+  /* We provide our own press feedback (active: states) on all of these —
+     suppress Safari's gray tap flash so it doesn't double up. Native
+     links WITHOUT custom feedback (nav, footer) keep the default flash
+     as their touch feedback. */
+  .btn,
+  .filter-chip,
+  .related-chip,
+  .carousel-dot,
+  .carousel-auto-toggle,
+  .nav-burger {
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+/* Materialized entrance for the mobile nav panel (§12: materialize, don't fade) */
+@keyframes menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+    filter: blur(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+.menu-panel {
+  animation: menu-in 200ms ease-out both;
+}
+
+/* Scroll edge effect instead of a hard divider (§12): the nav blends at rest
+   and separates only once content passes underneath. */
+.site-nav {
+  border-bottom: 1px solid transparent;
+  transition:
+    border-color 0.3s,
+    box-shadow 0.3s;
+}
+
+.site-nav[data-scrolled] {
+  border-bottom-color: var(--border);
+  box-shadow: 0 8px 24px -12px rgba(0, 0, 0, 0.18);
+}
+
 @keyframes fade-up {
   from {
     opacity: 0;
@@ -177,12 +370,40 @@ body {
   animation: fade-up 0.7s ease forwards;
 }
 
-/* Paul Rand 8-bar IBM wordmark (slab serif, eight even stripes) */
 .ibm-wordmark {
-  display: block;
-  height: 1.75rem;
-  width: auto;
+  display: inline-block;
   color: var(--text);
+  font-family: var(--font-ibm-plex-serif), Georgia, serif;
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  line-height: 1;
+  transition: color 0.2s;
+}
+
+/* Reduced transparency: frostier, solid material (§14) */
+@media (prefers-reduced-transparency: reduce) {
+  .site-nav {
+    background: var(--bg);
+    backdrop-filter: none;
+  }
+}
+
+/* Increased contrast: near-solid chrome, defined borders (§14) */
+@media (prefers-contrast: more) {
+  :root {
+    --border: rgba(10, 22, 40, 0.35);
+    --border-2: rgba(10, 22, 40, 0.5);
+    --nav-bg: rgba(247, 248, 250, 0.97);
+  }
+}
+
+@media (prefers-contrast: more) and (prefers-color-scheme: dark) {
+  :root {
+    --border: rgba(255, 255, 255, 0.3);
+    --border-2: rgba(255, 255, 255, 0.45);
+    --nav-bg: rgba(5, 7, 12, 0.97);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -196,9 +417,5 @@ body {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
-  }
-
-  .btn-primary:hover {
-    transform: none;
   }
 }

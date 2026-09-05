@@ -1,0 +1,27 @@
+---
+slug: oracle
+---
+
+## Problem
+
+A 70B-parameter model does not fit on any single machine most people own — but three Macs on a Thunderbolt-3 chain, with a few hundred gigabytes of combined RAM, are close. GPUs from 2018 contribute only a 2–4 GB hot cache. The question: can commodity hardware, chained by cable, run frontier-scale inference as one coherent pipeline?
+
+## Approach
+
+Oracle is a standalone C++20 engine that treats the TB3 mesh as a pipeline-parallel accelerator. The master tokenizes, embeds, and owns layers `[0, L/3)`; two workers own the middle and final thirds plus the `lm_head`. Each stage keeps its KV cache local — only activations travel. The master samples each token and repeats until EOS, while a UDP heartbeat control plane on port 9100 keeps the cluster honest.
+
+The hot path carries no protobuf and no JSON: a packed 76-byte `TensorHeader` (magic `ORCL`) precedes raw payloads, sent with `writev`/`readv` so header and body leave in one syscall. The local hop between processes uses a POSIX shared-memory SPSC ring.
+
+Runner selection is pluggable: Accelerate `cblas_sgemm` for tests and tiny models, a Metal GEMM shader for phase-3 tensor passes, and llama.cpp (GGUF metadata reader, optional in-process `ggml` when linked, or `posix_spawn` RPC). The v1 scope deliberately owns only the activation mesh between Oracle's own workers.
+
+Clients see a normal OpenAI API: `POST /v1/chat/completions` with SSE streaming on the master at `:8000`, so an iPhone app or plain `curl` treats the cable-connected Mac cluster like any hosted model.
+
+Bring-up is phase-gated: `phase1_net_bench.sh` requires >8 Gbps TCP and decode RTT well under 5 ms; `phase2_alloc_test.sh` proves the 70B-Q4 layer table fits RAM budgets; `phase3_tensor_pass.sh` checksums ring + GEMM; `phase4_e2e_infer.sh` runs `/v1/models` plus a short chat. A `--single` mode runs the whole pipeline on one node for smoke tests.
+
+## Outcome
+
+A working three-node inference pipeline over Thunderbolt-3 with a clean OpenAI-compatible front door, per-phase performance gates, and a wire protocol fast enough that the network, not serialization, is the bottleneck.
+
+## Stack
+
+C++20, CMake, CTest, Thunderbolt-3 IP networking, POSIX shared memory, Accelerate framework, Metal shaders, llama.cpp/GGUF, OpenAI-compatible HTTP + SSE.
