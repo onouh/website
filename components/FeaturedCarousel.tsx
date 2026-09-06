@@ -5,9 +5,10 @@ import { animate } from "motion";
 import { ProjectCard } from "@/components/ProjectCard";
 import type { Project } from "@/content/types";
 
-/** Layout constant (px): the gap between slides. The static peek that
- * telegraphs the next slide (§8) comes from the viewport's side padding
- * (the fluid --gutter var), not from any offset here. */
+/** Layout constant (px): the flex gap between slides — must match the
+ * track's `gap-6` class. The side peek (the sliver of the neighbors that
+ * telegraphs them, §8) comes from the slide width itself: content box
+ * minus one --peek inset per side (see globals.css). */
 const GAP = 24;
 
 /**
@@ -153,7 +154,7 @@ export function FeaturedCarousel({ projects }: { projects: Project[] }) {
       return;
     timerRef.current = window.setTimeout(() => {
       timerRef.current = null;
-      goToRef.current(indexRef.current + 1 >= count ? 0 : indexRef.current + 1);
+      goToRef.current(indexRef.current + 1 >= count ? count : indexRef.current + 1);
     }, AUTO_ADVANCE_MS);
   }, [count, reducedMotion]);
 
@@ -168,14 +169,18 @@ export function FeaturedCarousel({ projects }: { projects: Project[] }) {
 
   const geometry = useCallback(() => {
     const track = trackRef.current;
-    // Slide width as CSS resolves it: 100% of the track's content box (the
-    // viewport minus its side padding). Measuring the viewport's clientWidth
-    // instead included the padding, so every xForIndex was wrong by an
-    // index-proportional drift — later slides rested progressively further
-    // from center and could clip past the viewport edge.
-    const slideWidth = track ? track.clientWidth : 0;
+    const firstSlide = track?.querySelector<HTMLElement>(".carousel-slide");
+    // Slide width as CSS resolves it: content box minus one --peek inset
+    // per side (see globals.css). The leftover (track − slide) / 2 is the
+    // resting base offset that CENTERS the focused slide — symmetric
+    // side peeks at any width, no breakpoint (§16 Flexibility).
+    // offsetWidth, not getBoundingClientRect: the first slot is a clone
+    // that carries the neighbor scale at rest, and the rect would read
+    // the transform, not the layout width.
+    const slideWidth = firstSlide?.offsetWidth ?? 0;
     const step = slideWidth + GAP;
-    return { slideWidth, step, base: 0 };
+    const base = track ? (track.clientWidth - slideWidth) / 2 : 0;
+    return { slideWidth, step, base };
   }, []);
 
   /** X for a LOGICAL slide index — any integer, not just [0, count). The
@@ -185,8 +190,8 @@ export function FeaturedCarousel({ projects }: { projects: Project[] }) {
    * is pixel-identical to its real slide. */
   const xForIndex = useCallback(
     (index: number) => {
-      const { step } = geometry();
-      return -index * step;
+      const { step, base } = geometry();
+      return base - index * step;
     },
     [geometry],
   );
@@ -272,10 +277,22 @@ export function FeaturedCarousel({ projects }: { projects: Project[] }) {
           track.style.transform = `translate3d(${xForIndex(wrapped)}px, 0, 0)`;
         }
       };
+      /** Re-assert the normalized position across the next two frames: a
+       * stalled or stopped Motion ticker can flush one stale clone-position
+       * frame AFTER the teleport, which would park the strip on the clone
+       * (empty outer edge) until the next interaction. Writing again on
+       * later frames makes the real slot win every race. */
+      const reassert = () => {
+        requestAnimationFrame(() => {
+          normalize();
+          requestAnimationFrame(() => normalize());
+        });
+      };
       void controls.finished.then(
         () => {
           if (controlsRef.current === controls) {
             normalize();
+            reassert();
             track.style.willChange = "";
             controlsRef.current = null;
           }
@@ -288,9 +305,12 @@ export function FeaturedCarousel({ projects }: { projects: Project[] }) {
       window.setTimeout(() => {
         if (controlsRef.current === controls) {
           controls.stop();
-          track.style.transform = `translate3d(${targetX}px, 0, 0)`;
-          indexRef.current = index;
-          normalize();
+          // Write the NORMALIZED position directly — never the raw clone
+          // targetX: if timers stall between the two writes, the strip
+          // would rest on a clone with an empty outer edge.
+          const wrapped = wrapIndex(index, count);
+          indexRef.current = wrapped;
+          track.style.transform = `translate3d(${xForIndex(wrapped)}px, 0, 0)`;
           track.style.willChange = "";
           controlsRef.current = null;
         }
@@ -457,11 +477,12 @@ export function FeaturedCarousel({ projects }: { projects: Project[] }) {
 
       const current = liveX(track);
       const momentum = Math.abs(velocity) > FLICK_VELOCITY;
-      const { step } = drag;
+      const { step, base } = drag;
       // Project where the gesture is going, then snap to the nearest slot
       // on the circle (§6) — past the ends, the clones continue the strip.
+      // Invert trackX = base − index·step for the target index.
       const projected = current + (momentum ? projectMomentum(velocity) : 0);
-      const rawTarget = Math.round(-projected / step);
+      const rawTarget = Math.round((base - projected) / step);
       // §10: decide reverse vs commit from the velocity SIGN, not position —
       // a backward flick during a forward drag must go back, not advance.
       let target = rawTarget;
@@ -680,7 +701,6 @@ export function FeaturedCarousel({ projects }: { projects: Project[] }) {
                 aria-hidden={real ? undefined : true}
                 className="carousel-slide shrink-0"
                 data-neighbor={focused ? undefined : ""}
-                style={{ width: "100%" }}
               >
                 <ProjectCard
                   project={project}

@@ -243,6 +243,23 @@ body {
   opacity: 0.78;
 }
 
+/* ─── Geometry contract (shared with FeaturedCarousel.tsx) ─────────────
+   The track is flex-start (the JS positions it), and the CENTERING comes
+   from the slide width itself: a slide is the track's content box minus
+   one --peek inset on each side. The JS measures (track − slide) / 2 as
+   the resting base offset, so the focused card lands dead-center and the
+   two outermost slivers of the neighbors peek symmetrically — one --peek
+   each — at any viewport width, with no breakpoint. --peek mirrors the
+   page gutter so the deck breathes with the layout's fluid scale. */
+.carousel-viewport {
+  --peek: var(--gutter);
+}
+
+.carousel-slide {
+  /* content box minus one peek inset per side */
+  width: calc(100% - 2 * var(--peek));
+}
+
 .carousel-track[data-dragging] .carousel-slide {
   transition: none;
 }
