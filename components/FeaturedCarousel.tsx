@@ -49,7 +49,10 @@ const AUTO_ADVANCE_MS = 6000;
  * must match the .carousel-slide[data-neighbor] stylesheet state exactly, so
  * a drag hands off to the settle transition at identical values. */
 const DEPTH_SCALE = 0.045;
-const DEPTH_DIM = 0.22;
+/** Dim cap kept in lockstep with `.carousel-slide[data-neighbor]` opacity
+ * (0.88 = 1 − 0.12) in globals.css — the cap exists so the focused card's
+ * meta text stays above WCAG AA 4.5:1 even at deepest fade. */
+const DEPTH_DIM = 0.12;
 
 type Controls = ReturnType<typeof animate>;
 
@@ -754,10 +757,10 @@ export function FeaturedCarousel({ projects }: { projects: Project[] }) {
             role="tab"
             aria-selected={index === active}
             aria-label={`Go to slide ${index + 1}: ${project.name}`}
-            className={`carousel-dot h-2.5 rounded-full transition-all duration-200 active:scale-90 ${
+            className={`carousel-dot ${
               index === active
-                ? "w-6 bg-[var(--amber)]"
-                : "w-2.5 bg-[var(--border-2)] hover:bg-[var(--text-dim)]"
+                ? "carousel-dot--active"
+                : ""
             }`}
             onClick={() => {
               stopAuto(); // a deliberate dot pick takes the wheel

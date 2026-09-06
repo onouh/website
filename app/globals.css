@@ -9,11 +9,11 @@
   --amber: var(--quantum);
   --amber-dim: #163ca3;
   --amber-glow: rgba(30, 78, 204, 0.1);
-  --blue: #2f6bff;
+  --blue: #2258d8;
   --red: #e11d2e;
   --text: #05070c;
   --text-mid: #3d4a5c;
-  --text-dim: #6b7380;
+  --text-dim: #5d6673;
   --border: rgba(10, 22, 40, 0.08);
   --border-2: rgba(10, 22, 40, 0.14);
   --nav-bg: rgba(247, 248, 250, 0.88);
@@ -48,13 +48,16 @@
     --bg: #05070c;
     --bg-2: #0a1628;
     --bg-3: #122038;
-    --quantum: #2f6bff;
+    /* Dark accents and dim text are held to WCAG AA 4.5:1 against their
+       real backgrounds (Lighthouse color-contrast): --quantum lands on
+       --bg (#05070c), --blue on --bg-3 (#122038), --text-dim on --bg-3. */
+    --quantum: #6b96ff;
     --amber-dim: #1e4ecc;
-    --amber-glow: rgba(47, 107, 255, 0.08);
-    --blue: #5b8aff;
+    --amber-glow: rgba(107, 150, 255, 0.08);
+    --blue: #82a5ff;
     --text: #f7f8fa;
     --text-mid: #8b96ab;
-    --text-dim: #5a6578;
+    --text-dim: #8494ab;
     --border: rgba(255, 255, 255, 0.06);
     --border-2: rgba(255, 255, 255, 0.1);
     --nav-bg: rgba(5, 7, 12, 0.88);
@@ -243,9 +246,13 @@ body {
     opacity 420ms cubic-bezier(0.32, 0.72, 0, 1);
 }
 
+/* The dim is capped so the focused card's own meta text (chips, summary)
+   still clears WCAG AA 4.5:1 even at the deepest fade — depth must never
+   buy legibility debt (§16 Craft). 0.88 dim keeps the active slide's
+   composite text over 4.5:1 on its card background. */
 .carousel-slide[data-neighbor] {
   transform: scale(0.955);
-  opacity: 0.78;
+  opacity: 0.88;
 }
 
 /* ─── Geometry contract (shared with FeaturedCarousel.tsx) ─────────────
@@ -375,26 +382,53 @@ body {
 /* ─── Coarse-pointer affordances ────────────────────────────────────────
    Touch devices (primary input = coarse pointer): hit targets at or near
    Apple's 44pt guideline and WCAG 2.5.8's 24px minimum, without changing
-   the visual design for mouse users. Two techniques: pseudo-element hit
-   expansion (visuals pixel-identical, zero layout shift) for the small
-   round controls, and real size growth where a larger visible control
-   *is* the better touch design (§16 Flexibility). */
+   the visual design for mouse users. Touch gets real size growth where a
+   larger visible control *is* the better touch design (§16 Flexibility);
+   the carousel dots are structurally 24×24 targets for every pointer (see
+   the target-size block above). */
+/* ─── Carousel dots: WCAG 2.5.8 target size ───────────────────────
+   The button IS the 24×24 target on every input modality; the visible
+   pill is a ::before centered inside it. Lighthouse's target-size audit
+   measures the element box, so pseudo-element hit expansion can't pass
+   it — structural size can. These unlayered rules intentionally override
+   the size/paint utilities that used to live on the button, keeping the
+   rendered pill pixel-identical (inactive 10×10, active 24×10). */
+.carousel-dot {
+  position: relative;
+  width: 24px;
+  height: 24px;
+  border-radius: 9999px;
+  background: transparent;
+  padding: 0;
+}
+
+.carousel-dot::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  translate: -50% -50%;
+  width: 10px;
+  height: 10px;
+  border-radius: 9999px;
+  background: var(--border-2);
+  transition:
+    width 200ms,
+    height 200ms,
+    background-color 200ms;
+}
+
+.carousel-dot:hover::before {
+  background: var(--text-dim);
+}
+
+.carousel-dot--active::before {
+  width: 24px;
+  height: 10px;
+  background: var(--amber);
+}
+
 @media (pointer: coarse) {
-  /* Hit expansion: ::after stretches the tappable region past the visual
-     box. Adjacent dots end up ~2px overlapped — unavoidable when 10px
-     controls sit 18px apart, and harmless within one control family. */
-  .carousel-dot,
-  .carousel-auto-toggle {
-    position: relative;
-  }
-
-  .carousel-dot::after,
-  .carousel-auto-toggle::after {
-    content: "";
-    position: absolute;
-    inset: -7px;
-  }
-
   /* A real drag surface has no business showing a grab cursor on touch —
      there is no cursor. Overrides the fine-pointer-only Tailwind classes
      (this block comes later in the cascade). */
