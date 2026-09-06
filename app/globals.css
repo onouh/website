@@ -35,6 +35,11 @@
   --space-section: clamp(4rem, 2.5rem + 6vw, 7rem);
   /* Hero-scale vertical padding: 80 → 144px. */
   --space-hero: clamp(5rem, 3rem + 9vw, 9rem);
+  /* Carousel side peek: the space flanking the focused card (the neighbors'
+     visible sliver ≈ 2×peek − gap). Wider than the gutter on desktop so the
+     next card is clearly telegraphed (§8); phone stays close to the gutter
+     feel. Consumed by .carousel-slide's width and the dwell progress bar. */
+  --peek: clamp(1.5rem, 0.25rem + 4vw, 4.5rem);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -249,12 +254,9 @@ body {
    one --peek inset on each side. The JS measures (track − slide) / 2 as
    the resting base offset, so the focused card lands dead-center and the
    two outermost slivers of the neighbors peek symmetrically — one --peek
-   each — at any viewport width, with no breakpoint. --peek mirrors the
-   page gutter so the deck breathes with the layout's fluid scale. */
-.carousel-viewport {
-  --peek: var(--gutter);
-}
-
+   each — at any viewport width, with no breakpoint. --peek is a :root
+   token (see spacing scale above) so the dwell progress bar can align
+   with the active card too. */
 .carousel-slide {
   /* content box minus one peek inset per side */
   width: calc(100% - 2 * var(--peek));
@@ -262,6 +264,96 @@ body {
 
 .carousel-track[data-dragging] .carousel-slide {
   transition: none;
+}
+
+/* ─── Auto-advance dwell progress (the automation's public clock, §16) ──
+   A hairline under the deck that fills over the dwell while automation is
+   actually running. CSS animation (this is not gesture-driven motion),
+   driven by the [data-dwell] state attribute written from React:
+   running = animation live, anything else = width 0, paused = frozen via
+   animation-play-state (hover/focus pause freezes mid-fill — honest
+   feedback about WHY it's paused). Reduced motion hides it entirely:
+   automation never runs, so the clock would be dead chrome. */
+.carousel-progress {
+  position: relative;
+  margin: 1rem auto 0;
+  width: calc(100% - 2 * var(--peek));
+  max-width: 860px;
+  height: 2px;
+  border-radius: 1px;
+  background: var(--border);
+  overflow: hidden;
+}
+
+.carousel-progress::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform-origin: left;
+  transform: scaleX(0);
+  background: var(--amber);
+  opacity: 0.9;
+}
+
+.carousel-progress[data-dwell="running"]::before {
+  animation: carousel-dwell var(--dwell-ms, 6000ms) linear forwards;
+}
+
+.carousel-progress[data-dwell="paused"]::before {
+  animation: carousel-dwell var(--dwell-ms, 6000ms) linear forwards;
+  animation-play-state: paused;
+}
+
+@keyframes carousel-dwell {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .carousel-progress {
+    display: none;
+  }
+}
+
+/* ─── Tooltip (pure CSS, no JS cost) ─────────────────────────────────
+   Elements carrying [data-tip] show a small dark label on hover/focus.
+   Desktop idiom only: hidden on touch (no cursor to hover with — the
+   aria-label already exposes the action to screen readers there) and
+   under reduced motion it fades instead of sliding (§14). */
+[data-tip] {
+  position: relative;
+}
+
+[data-tip]::after {
+  content: attr(data-tip);
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translate(-50%, 2px);
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--radius);
+  background: var(--bg-3);
+  color: var(--text);
+  border: 1px solid var(--border-2);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+  font-family: var(--font-jetbrains);
+  font-size: 0.68rem;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition:
+    opacity 150ms ease,
+    transform 150ms ease;
+  z-index: 60;
+}
+
+@media (hover: hover) {
+  [data-tip]:hover::after,
+  [data-tip]:focus-visible::after {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

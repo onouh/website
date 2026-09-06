@@ -109,6 +109,11 @@ export function FeaturedCarousel({ projects }: { projects: Project[] }) {
     "idle",
   );
   const autoStateRef = useRef<"idle" | "running" | "stopped">("idle");
+  /** Reactive mirrors of the auto-advance's pause conditions that are NOT
+   * already folded into autoState (hover/focus pause, hidden tab) — the
+   * dwell progress bar renders from these. */
+  const [hoverPaused, setHoverPaused] = useState(false);
+  const [hidden, setHidden] = useState(false);
 
   /**
    * Deliberate auto-advance (§16 Agency: automation must yield). It runs
@@ -617,10 +622,14 @@ export function FeaturedCarousel({ projects }: { projects: Project[] }) {
       { threshold: 0.5 },
     );
     observer.observe(viewport);
-    document.addEventListener("visibilitychange", syncAuto);
+    const onVisibility = () => {
+      setHidden(document.hidden);
+      syncAuto();
+    };
+    document.addEventListener("visibilitychange", onVisibility);
     return () => {
       observer.disconnect();
-      document.removeEventListener("visibilitychange", syncAuto);
+      document.removeEventListener("visibilitychange", onVisibility);
       if (timerRef.current !== null) window.clearTimeout(timerRef.current);
       timerRef.current = null;
     };
@@ -643,12 +652,23 @@ export function FeaturedCarousel({ projects }: { projects: Project[] }) {
 
   const pauseAuto = () => {
     pausedRef.current = true;
+    setHoverPaused(true);
     syncAuto();
   };
   const resumeAuto = () => {
     pausedRef.current = false;
+    setHoverPaused(false);
     syncAuto();
   };
+
+  /** The dwell clock's display state: automation running = fill, a pause
+   * condition (hover/focus/hidden tab) = freeze mid-fill, anything else
+   * (user drive, stopped, idle) = empty. The key remounts the bar whenever
+   * the JS clock restarts its full dwell — slide advance or resume from
+   * pause — so the visual restart exactly when the timer does. */
+  const dwell =
+    autoState === "running" ? (hoverPaused || hidden ? "paused" : "running") : "off";
+  const dwellKey = `${active}:${dwell}`;
 
   return (
     <div
@@ -712,6 +732,19 @@ export function FeaturedCarousel({ projects }: { projects: Project[] }) {
         </div>
       </div>
 
+      {/* The automation's public clock (§16): fills over the dwell while
+          auto-advancing, freezes while paused (hover/focus/hidden), empty
+          when stopped. Remounted per dwell so restarts stay in sync with
+          the actual timer. Hidden from AT — the dots and toggle are the
+          accessible controls; hidden entirely under reduced motion. */}
+      <div
+        key={dwellKey}
+        className="carousel-progress"
+        data-dwell={dwell}
+        style={{ "--dwell-ms": `${AUTO_ADVANCE_MS}ms` } as React.CSSProperties}
+        aria-hidden
+      />
+
       <div className="mt-6 flex items-center justify-center gap-3">
         <div className="flex gap-2" role="tablist" aria-label="Choose slide">
         {projects.map((project, index) => (
@@ -740,6 +773,16 @@ export function FeaturedCarousel({ projects }: { projects: Project[] }) {
           className="carousel-auto-toggle flex h-6 w-6 items-center justify-center rounded-full text-[var(--text-dim)] transition-[color,transform] duration-150 hover:text-[var(--text)] active:scale-90"
           aria-pressed={autoState === "running"}
           aria-label={
+            autoState === "running"
+              ? "Pause auto-rotation"
+              : "Play auto-rotation"
+          }
+          data-tip={
+            autoState === "running"
+              ? "Pause auto-rotation"
+              : "Play auto-rotation"
+          }
+          title={
             autoState === "running"
               ? "Pause auto-rotation"
               : "Play auto-rotation"
