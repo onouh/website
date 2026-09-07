@@ -1,11 +1,24 @@
 "use client";
 
 import { AnimatePresence, LayoutGroup, motion, useReducedMotion } from "motion/react";
+import Link from "next/link";
 import { useState } from "react";
 import { ProjectCard } from "@/components/ProjectCard";
 import { ProjectFilters } from "@/components/ProjectFilters";
-import { filterProjects } from "@/content/projects";
+import { filterProjects, projects } from "@/content/projects";
 import type { ProjectFilterId } from "@/content/types";
+
+/** Label for the aria-live announcement — chips show short ids ("OS",
+ * "ML"), the live region speaks the full filter label. */
+const FILTER_LABELS: Record<ProjectFilterId | "all", string> = {
+  all: "All projects",
+  os: "Operating systems",
+  compilers: "Compilers",
+  fpga: "FPGA",
+  systems: "Systems",
+  ml: "Machine learning",
+  software: "Software",
+};
 
 /** Spring for the grid's layout morph — cards glide to their new slot with
  * a whisper of overshoot (visible life, never a rattle). */
@@ -51,16 +64,28 @@ export function ProjectGallery({ initialFilter }: { initialFilter: ProjectFilter
     <ProjectFilters active={active} onNavigate={select} />
   );
 
+  /** Result count announced on every filter change (and on mount, harmlessly
+   * — SRs ignore the initial value of a live region that renders with the
+   * page). Polite: this is secondary info, never an interruption. */
+  const announcement = `Showing ${list.length} of ${projects.length} projects — ${FILTER_LABELS[active]}`;
+
   if (reduced) {
     // Reduced motion: content swaps in place, no transform/opacity work.
     return (
       <>
         {chips}
-        <div className="grid gap-6 md:grid-cols-2">
-          {list.map((project) => (
-            <ProjectCard key={project.slug} project={project} />
-          ))}
-        </div>
+        <p className="sr-only" aria-live="polite">
+          {announcement}
+        </p>
+        {list.length === 0 ? (
+          <EmptyState filterLabel={FILTER_LABELS[active]} />
+        ) : (
+          <div className="grid gap-6 md:grid-cols-2">
+            {list.map((project) => (
+              <ProjectCard key={project.slug} project={project} />
+            ))}
+          </div>
+        )}
       </>
     );
   }
@@ -68,28 +93,56 @@ export function ProjectGallery({ initialFilter }: { initialFilter: ProjectFilter
   return (
     <>
       {chips}
-      <LayoutGroup>
-        <motion.ul
-          className="m-0 grid list-none gap-6 p-0 md:grid-cols-2"
-          layout
-          transition={SPRING_LAYOUT}
-        >
-          <AnimatePresence mode="popLayout" initial={false}>
-            {list.map((project) => (
-              <motion.li
-                key={project.slug}
-                layout
-                transition={SPRING_LAYOUT}
-                initial={{ opacity: 0, y: 18, scale: 0.98 }}
-                animate={ENTER}
-                exit={EXIT}
-              >
-                <ProjectCard project={project} />
-              </motion.li>
-            ))}
-          </AnimatePresence>
-        </motion.ul>
-      </LayoutGroup>
+      <p className="sr-only" aria-live="polite">
+        {announcement}
+      </p>
+      {list.length === 0 ? (
+        <EmptyState filterLabel={FILTER_LABELS[active]} />
+      ) : (
+        <LayoutGroup>
+          <motion.ul
+            className="m-0 grid list-none gap-6 p-0 md:grid-cols-2"
+            layout
+            transition={SPRING_LAYOUT}
+          >
+            <AnimatePresence mode="popLayout" initial={false}>
+              {list.map((project) => (
+                <motion.li
+                  key={project.slug}
+                  layout
+                  transition={SPRING_LAYOUT}
+                  initial={{ opacity: 0, y: 18, scale: 0.98 }}
+                  animate={ENTER}
+                  exit={EXIT}
+                >
+                  <ProjectCard project={project} />
+                </motion.li>
+              ))}
+            </AnimatePresence>
+          </motion.ul>
+        </LayoutGroup>
+      )}
     </>
+  );
+}
+
+/** Designed empty state for a filter that matches nothing — must never be
+ * a blank grid. Offers the escape hatch back to All. */
+function EmptyState({ filterLabel }: { filterLabel: string }) {
+  return (
+    <div
+      className="flex flex-col items-center gap-3 rounded-[var(--radius-lg)] border border-dashed border-[var(--border-2)] px-6 py-16 text-center"
+      role="status"
+    >
+      <p className="font-[family-name:var(--font-syne)] text-xl font-bold text-[var(--text)]">
+        Nothing in {filterLabel} yet
+      </p>
+      <p className="max-w-sm text-sm text-[var(--text-mid)]">
+        No projects carry this tag right now — but the shelf is always growing.
+      </p>
+      <Link href="/projects" className="btn btn-outline mt-2">
+        Show all projects
+      </Link>
+    </div>
   );
 }
