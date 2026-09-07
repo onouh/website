@@ -475,22 +475,85 @@ body {
   }
 }
 
-/* Materialized entrance for the mobile nav panel (§12: materialize, don't fade) */
-@keyframes menu-in {
+/* Mobile drawer, in the intro curtain's vocabulary: a decisive vertical
+   wipe (clip-path, no fade), staggered link rise, and a symmetric wipe-out
+   on close so the panel never pops. */
+@keyframes menu-wipe-in {
+  from {
+    clip-path: inset(0 0 100% 0);
+  }
+  to {
+    clip-path: inset(0 0 -2% 0); /* slight over-wipe: 1px underlines survive */
+  }
+}
+
+@keyframes menu-wipe-out {
+  from {
+    clip-path: inset(0 0 0% 0);
+  }
+  to {
+    clip-path: inset(0 0 100% 0);
+  }
+}
+
+@keyframes menu-link-in {
   from {
     opacity: 0;
-    transform: translateY(-8px);
-    filter: blur(4px);
+    transform: translateY(10px);
   }
   to {
     opacity: 1;
     transform: translateY(0);
-    filter: blur(0);
   }
 }
 
 .menu-panel {
-  animation: menu-in 200ms ease-out both;
+  animation: menu-wipe-in 280ms cubic-bezier(0.32, 0.72, 0, 1) both;
+}
+
+.menu-panel[data-closing] {
+  animation: menu-wipe-out 220ms cubic-bezier(0.76, 0, 0.24, 1) both;
+}
+
+.menu-panel-item {
+  animation: menu-link-in 360ms cubic-bezier(0.32, 0.72, 0, 1) both;
+  animation-delay: calc(80ms + var(--i, 0) * 45ms);
+}
+
+.menu-panel[data-closing] .menu-panel-item {
+  animation: none;
+}
+
+/* Dimmed page behind the drawer: pointer-events only while visible, so
+   closed state never intercepts page taps. */
+.menu-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: rgba(3, 5, 10, 0.55);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 250ms ease;
+}
+
+.menu-backdrop--on {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .menu-panel,
+  .menu-panel[data-closing],
+  .menu-panel-item {
+    animation: none;
+    clip-path: none;
+    opacity: 1;
+    transform: none;
+  }
+
+  .menu-backdrop {
+    transition: none;
+  }
 }
 
 /* Scroll edge effect instead of a hard divider (§12): the nav blends at rest
@@ -842,6 +905,13 @@ html[data-curtain-js] .hero-kicker-line {
 .nav-link[data-active]::after {
   transform: scaleX(1);
   background: var(--amber-dim);
+}
+
+/* Scrollspy: a section of THIS route's page belonging to another nav route
+   is in the reading band — amber color signal, no underline (it's a softer
+   claim than aria-current). */
+.nav-link[data-spy] {
+  color: var(--amber-dim);
 }
 
 .ibm-wordmark {

@@ -23,7 +23,7 @@ export default function ResumePage() {
         </a>
       </Reveal>
 
-      <section className="mb-12">
+      <section id="resume-education" className="mb-12">
         <h2 className="mb-4 font-[family-name:var(--font-syne)] text-xl font-bold">
           Education
         </h2>
@@ -44,7 +44,7 @@ export default function ResumePage() {
         </ul>
       </section>
 
-      <section className="mb-12">
+      <section id="resume-skills" className="mb-12">
         <h2 className="mb-4 font-[family-name:var(--font-syne)] text-xl font-bold">
           Technical skills
         </h2>
@@ -56,7 +56,7 @@ export default function ResumePage() {
         ))}
       </section>
 
-      <section className="mb-12">
+      <section id="resume-experience" className="mb-12">
         <h2 className="mb-4 font-[family-name:var(--font-syne)] text-xl font-bold">
           Professional experience
         </h2>
@@ -76,7 +76,7 @@ export default function ResumePage() {
         </ul>
       </section>
 
-      <section className="mb-12">
+      <section id="resume-projects" className="mb-12">
         <h2 className="mb-4 font-[family-name:var(--font-syne)] text-xl font-bold">
           Selected engineering projects
         </h2>
