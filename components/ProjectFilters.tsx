@@ -6,8 +6,11 @@ import type { ProjectFilterId } from "@/content/types";
 
 export function ProjectFilters({
   active,
+  onNavigate,
 }: {
   active: ProjectFilterId | "all";
+  /** Called instead of a server round-trip when a chip is clicked. */
+  onNavigate?: (next: ProjectFilterId | "all") => void;
 }) {
   const items: { id: ProjectFilterId | "all"; label: string }[] = [
     { id: "all", label: "All" },
@@ -24,6 +27,7 @@ export function ProjectFilters({
             key={item.id}
             href={href}
             scroll={false}
+            onClick={onNavigate ? () => onNavigate(item.id) : undefined}
             className={`filter-chip rounded-[var(--radius)] border px-3 py-1.5 font-[family-name:var(--font-jetbrains)] text-xs uppercase tracking-wide transition-[border-color,background-color,color,transform] duration-150 active:scale-95 ${
               selected
                 ? "border-[var(--amber-dim)] bg-[var(--amber-glow)] text-[var(--amber)]"

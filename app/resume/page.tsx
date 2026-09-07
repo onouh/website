@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { PageShell, SectionHeader } from "@/components/PageChrome";
+import { Reveal } from "@/components/motion";
 import { education } from "@/content/education";
 import { experienceChronological } from "@/content/experience";
 import { profile } from "@/content/profile";
@@ -15,12 +16,12 @@ export default function ResumePage() {
   return (
     <PageShell>
       <SectionHeader index="CV" label="Resume" title={profile.name} />
-      <div className="mb-10 flex flex-wrap items-center justify-between gap-4">
+      <Reveal className="mb-10 flex flex-wrap items-center justify-between gap-4">
         <p className="max-w-2xl text-[var(--text-mid)]">{profile.summary[0]}</p>
         <a href="/omar-nouh-resume.pdf" className="btn btn-primary" download>
           Download PDF
         </a>
-      </div>
+      </Reveal>
 
       <section className="mb-12">
         <h2 className="mb-4 font-[family-name:var(--font-syne)] text-xl font-bold">

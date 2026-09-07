@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import { PageShell, SectionHeader } from "@/components/PageChrome";
-import { ProjectCard } from "@/components/ProjectCard";
-import { ProjectFilters } from "@/components/ProjectFilters";
-import { filterProjects } from "@/content/projects";
+import { Reveal } from "@/components/motion";
+import { ProjectGallery } from "@/components/ProjectGallery";
 import type { ProjectFilterId } from "@/content/types";
 
 export const metadata: Metadata = {
@@ -29,21 +28,13 @@ export default async function ProjectsPage({
   const raw = params.filter;
   const active: ProjectFilterId | "all" =
     raw && filters.has(raw as ProjectFilterId) ? (raw as ProjectFilterId) : "all";
-  const list = filterProjects(active);
 
   return (
     <PageShell>
       <SectionHeader index="04" label="Projects" title="What I've Built" />
-      <ProjectFilters active={active} />
-      {list.length === 0 ? (
-        <p className="text-[var(--text-mid)]">No projects in this category yet.</p>
-      ) : (
-        <div className="grid gap-6 md:grid-cols-2">
-          {list.map((project) => (
-            <ProjectCard key={project.slug} project={project} />
-          ))}
-        </div>
-      )}
+      <Reveal>
+        <ProjectGallery initialFilter={active} />
+      </Reveal>
     </PageShell>
   );
 }

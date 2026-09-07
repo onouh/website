@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { animate } from "motion";
 import { ProjectCard } from "@/components/ProjectCard";
 import type { Project } from "@/content/types";
 
@@ -54,7 +53,109 @@ const DEPTH_SCALE = 0.045;
  * meta text stays above WCAG AA 4.5:1 even at deepest fade. */
 const DEPTH_DIM = 0.12;
 
-type Controls = ReturnType<typeof animate>;
+type Controls = Flight;
+
+/**
+ * WAAPI spring flight. Motion's animate() drives springs from
+ * requestAnimationFrame callbacks — which never fire in some embedded
+ * preview environments (compositor-driven CSS/WAAPI animations keep
+ * running there; rAF task queues stall). A flight that freezes mid-strip
+ * reads as "this dot is wired to the wrong slide": the strip hangs with
+ * the previous card centered until a watchdog snaps it. So flights are
+ * generated analytically here — the same stiffness/damping physics and
+ * the same release-velocity handoff Motion would use — and played through
+ * the Web Animations API, which advances on the compositor clock.
+ */
+type Flight = {
+  /** Interrupt: commit the live mid-flight position inline, drop the effect. */
+  stop: () => void;
+  /** Natural end: pin the final position inline, drop the effect. */
+  finalize: (x: number) => void;
+  /** Analytic settle duration in ms (also drives the settle watchdog). */
+  duration: number;
+  finished: Promise<void>;
+};
+
+/** Displacement from target for a unit-mass damped spring at time t (s),
+ * starting at `from` with initial velocity `velocity` (px/s, same sign
+ * convention Motion uses for x). Under- and critically-damped closed forms. */
+function springOffset(
+  t: number,
+  opts: { from: number; to: number; velocity: number; stiffness: number; damping: number },
+): number {
+  const x0 = opts.from - opts.to;
+  const v0 = opts.velocity;
+  const w0 = Math.sqrt(opts.stiffness);
+  const zeta = opts.damping / (2 * w0);
+  if (zeta < 1) {
+    const wd = w0 * Math.sqrt(1 - zeta * zeta);
+    const env = Math.exp(-zeta * w0 * t);
+    return (
+      x0 * env * (Math.cos(wd * t) + ((zeta * w0) / wd) * Math.sin(wd * t)) +
+      (v0 / wd) * env * Math.sin(wd * t)
+    );
+  }
+  const env = Math.exp(-w0 * t);
+  return (x0 + (v0 + w0 * x0) * t) * env;
+}
+
+/** Settle duration: first time the displacement stays under half a pixel
+ * (3 consecutive 16ms samples), capped at 3s. For the tap spring this lands
+ * near Motion's own perceptual settle (~560ms over a slide width). */
+function springDuration(
+  opts: { from: number; to: number; velocity: number; stiffness: number; damping: number },
+): number {
+  let consecutive = 0;
+  for (let t = 16; t <= 3000; t += 16) {
+    if (Math.abs(springOffset(t, opts)) < 0.5) {
+      consecutive += 1;
+      if (consecutive >= 3) return Math.max(t - 32, 32);
+    } else {
+      consecutive = 0;
+    }
+  }
+  return 3000;
+}
+
+function flyTrack(
+  track: HTMLElement,
+  opts: { from: number; to: number; velocity: number; stiffness: number; damping: number },
+): Flight {
+  const duration = springDuration(opts);
+  const frames = Math.max(2, Math.round(duration / 16) + 1);
+  const keyframes: { transform: string }[] = [];
+  for (let i = 0; i < frames; i++) {
+    const t = (duration * i) / (frames - 1);
+    const x =
+      i === frames - 1
+        ? opts.to
+        : opts.to + springOffset(t, opts);
+    keyframes.push({ transform: `translate3d(${x}px, 0, 0)` });
+  }
+  const anim = track.animate(keyframes, {
+    duration,
+    easing: "linear",
+    fill: "forwards",
+  });
+  const finished = anim.finished.then(
+    () => {},
+    () => {}, // cancellations reject; the caller owns state transitions
+  );
+  const commit = (x: number) => {
+    track.style.transform = `translate3d(${x}px, 0, 0)`;
+    anim.cancel();
+  };
+  return {
+    stop() {
+      commit(liveX(track));
+    },
+    finalize(x: number) {
+      commit(x);
+    },
+    duration,
+    finished,
+  };
+}
 
 /**
  * Apple's momentum projection (Designing Fluid Interfaces): exponential
@@ -107,6 +208,20 @@ export function FeaturedCarousel({ projects }: { projects: Project[] }) {
     base: 0,
   });
   const [active, setActive] = useState(0);
+  /** The LOGICAL index the strip is at or flying toward: the pre-normalize
+   * target during a flight (it may be −1 or count, i.e. a clone slot), and
+   * the wrapped index at rest. Drives the depth/focus state so a landing
+   * clone is full-depth only WHILE it is the destination — never at rest
+   * (a full-depth clone parked beside its real twin reads as the same card
+   * being in two places at once). */
+  const [logical, setLogical] = useState(0);
+  /** Whether rAF frames actually flow. In some embedded preview contexts
+   * the frame clock never advances — an animation built on it never
+   * presents a frame, so a spring "flight" would hang on the pre-flight
+   * picture until the watchdog snaps. There the correct behavior is a
+   * jump-cut (land instantly); in real browsers this always reads false
+   * and every transition keeps its spring. Probed once per flight. */
+  const framesStalledRef = useRef<boolean | null>(null);
   /** null = never started or permanently stopped by user drive. */
   const [autoState, setAutoState] = useState<"idle" | "running" | "stopped">(
     "idle",
@@ -130,8 +245,21 @@ export function FeaturedCarousel({ projects }: { projects: Project[] }) {
    * Reduced motion never auto-advances at all (§14).
    */
   const timerRef = useRef<number | null>(null);
+  const rootRef = useRef<HTMLDivElement | null>(null);
+  /** Pause conditions, kept SEPARATE: pointer-hover and focus-within each
+   * hold their own flag. One shared flag let hover-out resume automation
+   * while the carousel still held keyboard focus (and mirror-wise) — the
+   * automation could advance under a keyboard/screen-reader user's hands. */
+  const hoverPausedRef = useRef(false);
+  const focusPausedRef = useRef(false);
   const pausedRef = useRef(false);
   const drivesRef = useRef(false);
+  /** Monotonic auto-advance epoch. Incremented whenever the user takes the
+   * wheel (stopAuto) or the toggle flips state. Timers and async
+   * continuations capture their epoch when armed and check it before they
+   * act — a stale auto tick that resolves after a user interaction is
+   * discarded instead of moving the strip one extra step. */
+  const autoEpochRef = useRef(0);
   /** Late-bound handle to `goTo` (declared below) — breaks the declaration cycle. */
   const goToRef = useRef<(index: number) => void>(() => {});
 
@@ -160,17 +288,21 @@ export function FeaturedCarousel({ projects }: { projects: Project[] }) {
       reducedMotion()
     )
       return;
+    // Capture the epoch at arm time; the tick validates it before acting.
+    const epoch = autoEpochRef.current;
     timerRef.current = window.setTimeout(() => {
       timerRef.current = null;
+      if (epoch !== autoEpochRef.current) return; // user drove meanwhile
       goToRef.current(indexRef.current + 1 >= count ? count : indexRef.current + 1);
     }, AUTO_ADVANCE_MS);
   }, [count, reducedMotion]);
 
-  /** User takes the wheel: latch permanently stopped AND disarm any armed
-   * dwell — without the syncAuto, an already-armed timer could still fire
-   * one last advance after the user drove. */
+  /** User takes the wheel: latch permanently stopped, invalidate any armed
+   * dwell AND any in-flight auto continuation (both validate against the
+   * bumped epoch), then disarm. */
   const stopAuto = useCallback(() => {
     drivesRef.current = true;
+    autoEpochRef.current += 1;
     setAuto("stopped");
     syncAuto();
   }, [setAuto, syncAuto]);
@@ -189,6 +321,34 @@ export function FeaturedCarousel({ projects }: { projects: Project[] }) {
     const step = slideWidth + GAP;
     const base = track ? (track.clientWidth - slideWidth) / 2 : 0;
     return { slideWidth, step, base };
+  }, []);
+
+  /** Detect a stalled frame clock: three queued rAF ticks that all report
+   * ~zero elapsed time mean the callbacks run back-to-back without real
+   * frames between them — no pictures are being presented, so transform
+   * animations can't be seen. Cached for the session; a healthy clock
+   * never flips back. */
+  const framesStalled = useCallback(() => {
+    if (framesStalledRef.current !== null)
+      return Promise.resolve(framesStalledRef.current);
+    return new Promise<boolean>((resolve) => {
+      let first = 0;
+      const fallback = window.setTimeout(() => {
+        framesStalledRef.current = true;
+        resolve(true);
+      }, 320);
+      requestAnimationFrame(() => {
+        first = performance.now();
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            window.clearTimeout(fallback);
+            const stalled = performance.now() - first < 32;
+            framesStalledRef.current = stalled;
+            resolve(stalled);
+          });
+        });
+      });
+    });
   }, []);
 
   /** X for a LOGICAL slide index — any integer, not just [0, count). The
@@ -243,102 +403,122 @@ export function FeaturedCarousel({ projects }: { projects: Project[] }) {
       if (!track) return;
       indexRef.current = index;
       setActive(wrapIndex(index, count));
+      setLogical(index);
       controlsRef.current?.stop();
 
       if (reducedMotion()) {
         // No motion: land directly on the REAL slide, no clone hop needed.
         const wrapped = wrapIndex(index, count);
         indexRef.current = wrapped;
+        setLogical(wrapped);
         track.style.transform = `translate3d(${xForIndex(wrapped)}px, 0, 0)`;
         return;
       }
 
       track.style.willChange = "transform";
       const targetX = xForIndex(index);
-      const controls = animate(
-        track,
-        { x: targetX },
-        {
-          ...(opts?.momentum ? SPRING_FLICK : SPRING_TAP),
-          // Hand off the release velocity in the spring's travel direction.
-          // Positive velocity means the track moves toward higher x values
-          // (earlier slides), negative toward lower (later slides).
-          ...(opts?.velocity && opts.velocity !== 0
-            ? {
-                velocity:
-                  opts.velocity > 0
-                    ? Math.abs(opts.velocity)
-                    : -Math.abs(opts.velocity),
-              }
-            : {}),
-        },
-      );
-      controlsRef.current = controls;
+      // Interrupt: grab the LIVE position (fill:forwards effect wins over
+      // the inline style, so read it through the computed transform).
+      const fromX = liveX(track);
+      // Release velocity handoff, same sign convention Motion uses: positive
+      // velocity moves the track toward higher x (earlier slides).
+      const velocity = opts?.velocity ?? 0;
+      const spring = opts?.momentum ? SPRING_FLICK : SPRING_TAP;
+      const flight = flyTrack(track, {
+        from: fromX,
+        to: targetX,
+        velocity,
+        stiffness: spring.stiffness,
+        damping: spring.damping,
+      });
+      controlsRef.current = flight;
+
       /** Land on a clone slot (index outside [0, count)) → teleport the track
        * by whole strip periods to the equivalent REAL slot. Same frame, no
        * transition on the track, pixel-identical content: seamless (§3). */
       const normalize = () => {
-        const logical = indexRef.current;
-        const wrapped = wrapIndex(logical, count);
-        if (wrapped !== logical) {
+        const logicalIndex = indexRef.current;
+        const wrapped = wrapIndex(logicalIndex, count);
+        if (wrapped !== logicalIndex) {
           indexRef.current = wrapped;
+          setLogical(wrapped);
           track.style.transform = `translate3d(${xForIndex(wrapped)}px, 0, 0)`;
         }
       };
-      /** Re-assert the normalized position across the next two frames: a
-       * stalled or stopped Motion ticker can flush one stale clone-position
-       * frame AFTER the teleport, which would park the strip on the clone
-       * (empty outer edge) until the next interaction. Writing again on
-       * later frames makes the real slot win every race. */
+      /** Re-assert the normalized position across the next two frames: any
+       * lingering fill effect can flush one stale clone-position frame AFTER
+       * the teleport, which would park the strip on the clone (empty outer
+       * edge) until the next interaction. Writing again on later frames makes
+       * the real slot win every race. */
       const reassert = () => {
         requestAnimationFrame(() => {
           normalize();
           requestAnimationFrame(() => normalize());
         });
       };
-      void controls.finished.then(
-        () => {
-          if (controlsRef.current === controls) {
-            normalize();
-            reassert();
-            track.style.willChange = "";
-            controlsRef.current = null;
-          }
-        },
-        () => {},
-      );
-      // Stalled-clock safeguard (throttled rAF in background tabs): if the
-      // spring never settles, finalize after it could plausibly have done so.
-      // In real browsers `finished` clears `controlsRef` first, so this no-ops.
-      window.setTimeout(() => {
-        if (controlsRef.current === controls) {
-          controls.stop();
-          // Write the NORMALIZED position directly — never the raw clone
-          // targetX: if timers stall between the two writes, the strip
-          // would rest on a clone with an empty outer edge.
-          const wrapped = wrapIndex(index, count);
-          indexRef.current = wrapped;
-          track.style.transform = `translate3d(${xForIndex(wrapped)}px, 0, 0)`;
-          track.style.willChange = "";
-          controlsRef.current = null;
-        }
-      }, 1200);
+      let settled = false;
+      const settle = () => {
+        if (settled || controlsRef.current !== flight) return;
+        settled = true;
+        // Pin the landing BEFORE canceling the fill effect so the strip
+        // never flashes back to its pre-flight position.
+        flight.finalize(targetX);
+        controlsRef.current = null;
+        track.style.willChange = "";
+        normalize();
+        reassert();
+      };
+      void flight.finished.then(settle);
+      // Settle watchdog: in environments where the compositor clock (or the
+      // finished promise) stalls, the flight would otherwise run forever and
+      // leave the strip parked mid-way or on a clone. The duration is known
+      // analytically, so finalize right after it could plausibly have ended.
+      window.setTimeout(settle, flight.duration + 350);
     },
     [count, reducedMotion, xForIndex],
   );
 
+  /** goTo wrapper: with a healthy frame clock, fly the spring; with a
+   * stalled one, land instantly (a flight could never present a frame, so
+   * the honest transition is a cut, not a frozen picture). */
+  const goToAdaptive = useCallback(
+    (index: number, opts?: { velocity?: number; momentum?: boolean }) => {
+      void framesStalled().then((stalled) => {
+        if (stalled) {
+          const track = trackRef.current;
+          if (!track) return;
+          controlsRef.current?.stop();
+          const wrapped = wrapIndex(index, count);
+          indexRef.current = wrapped;
+          setActive(wrapped);
+          setLogical(wrapped);
+          track.style.willChange = "";
+          track.style.transform = `translate3d(${xForIndex(wrapped)}px, 0, 0)`;
+          return;
+        }
+        goTo(index, opts);
+      });
+    },
+    [count, framesStalled, goTo, xForIndex],
+  );
+
   /** Late-bind `goTo` into the auto-advance timer, re-arming the clock after
-   * each automated landing. User-drive paths call `goTo` directly, so they
-   * don't re-arm (their latch is set before the call). */
+   * each automated landing. User-drive paths call `goToAdaptive` directly, so
+   * they don't re-arm (their latch is set before the call). The epoch is
+   * captured BEFORE the async flight starts: if the user drives while the
+   * probe/flight is in the air, the re-arm is discarded (the flight itself
+   * still completes — motion is never yanked mid-gesture — it just doesn't
+   * schedule another automated advance). */
   useEffect(() => {
     goToRef.current = (index: number) => {
-      goTo(index);
-      syncAuto();
+      const epoch = autoEpochRef.current;
+      goToAdaptive(index);
+      if (epoch === autoEpochRef.current) syncAuto();
     };
     return () => {
       goToRef.current = () => {};
     };
-  }, [goTo, syncAuto]);
+  }, [goToAdaptive, syncAuto]);
 
   /** Window-level safety net for the pointer gesture: self-removing
    * pointerup/pointercancel listeners so a release OUTSIDE the viewport
@@ -502,9 +682,9 @@ export function FeaturedCarousel({ projects }: { projects: Project[] }) {
       // rendered range [−1, count] (clone slots included) without a jump.
       while (target < -1) target += count;
       while (target > count) target -= count;
-      goTo(target, { velocity, momentum });
+      goToAdaptive(target, { velocity, momentum });
     },
-    [count, goTo],
+    [count, goToAdaptive],
   );
 
   // Late-bind `settle` for the window-level end-gesture safety net.
@@ -529,16 +709,16 @@ export function FeaturedCarousel({ projects }: { projects: Project[] }) {
         stopAuto();
       }
       if (event.key === "ArrowRight") {
-        goTo(current + 1);
+        goToAdaptive(current + 1);
       } else if (event.key === "ArrowLeft") {
-        goTo(current - 1);
+        goToAdaptive(current - 1);
       } else if (event.key === "Home") {
-        goTo(0);
+        goToAdaptive(0);
       } else if (event.key === "End") {
-        goTo(count - 1);
+        goToAdaptive(count - 1);
       }
     },
-    [count, goTo, stopAuto],
+    [count, goToAdaptive, stopAuto],
   );
 
   /**
@@ -567,9 +747,9 @@ export function FeaturedCarousel({ projects }: { projects: Project[] }) {
       event.preventDefault();
       event.stopPropagation();
       stopAuto(); // driving to a peeked slide is user intent
-      goTo(logical);
+      goToAdaptive(logical);
     }
-  }, [count, goTo, stopAuto]);
+  }, [count, goToAdaptive, stopAuto]);
 
   // Focus entering an off-screen slide pulls that slide into view.
   const onFocusCapture = useCallback(
@@ -579,9 +759,9 @@ export function FeaturedCarousel({ projects }: { projects: Project[] }) {
       );
       if (!slide) return;
       const slideIndex = Number(slide.dataset.slideIndex);
-      if (slideIndex !== indexRef.current) goTo(slideIndex);
+      if (slideIndex !== indexRef.current) goToAdaptive(slideIndex);
     },
-    [goTo],
+    [goToAdaptive],
   );
 
   // Re-measure on resize; keep the active slide pinned without animation.
@@ -615,9 +795,11 @@ export function FeaturedCarousel({ projects }: { projects: Project[] }) {
   useEffect(() => {
     const viewport = viewportRef.current;
     if (!viewport) return;
+    let sawCallback = false;
     let onScreen = false;
     const observer = new IntersectionObserver(
       (entries) => {
+        sawCallback = true;
         onScreen = entries.some((entry) => entry.isIntersecting);
         if (onScreen && autoStateRef.current === "idle") setAuto("running");
         syncAuto();
@@ -625,6 +807,30 @@ export function FeaturedCarousel({ projects }: { projects: Project[] }) {
       { threshold: 0.5 },
     );
     observer.observe(viewport);
+    /* Degraded-clock fallback: some embedded webviews never deliver IO
+     * callbacks for dynamically-added observers. If nothing arrives in
+     * 500 ms, fall back to manual geometric checks (scroll/resize/visibility
+     * listeners) so on-screen arming still works. Real browsers clear this
+     * path on the first IO callback — zero cost there. */
+    let degraded = false;
+    const manuallyOnScreen = () => {
+      const r = viewport.getBoundingClientRect();
+      return r.top < window.innerHeight * 0.5 && r.bottom > window.innerHeight * 0.5;
+    };
+    const degradedCheck = () => {
+      if (!degraded) return;
+      const on = manuallyOnScreen();
+      if (on && autoStateRef.current === "idle") setAuto("running");
+      setHidden(document.hidden);
+      syncAuto();
+    };
+    const degradedTimer = window.setTimeout(() => {
+      if (sawCallback) return;
+      degraded = true;
+      window.addEventListener("scroll", degradedCheck, { passive: true });
+      window.addEventListener("resize", degradedCheck);
+      degradedCheck();
+    }, 500);
     const onVisibility = () => {
       setHidden(document.hidden);
       syncAuto();
@@ -632,6 +838,9 @@ export function FeaturedCarousel({ projects }: { projects: Project[] }) {
     document.addEventListener("visibilitychange", onVisibility);
     return () => {
       observer.disconnect();
+      window.clearTimeout(degradedTimer);
+      window.removeEventListener("scroll", degradedCheck);
+      window.removeEventListener("resize", degradedCheck);
       document.removeEventListener("visibilitychange", onVisibility);
       if (timerRef.current !== null) window.clearTimeout(timerRef.current);
       timerRef.current = null;
@@ -640,9 +849,11 @@ export function FeaturedCarousel({ projects }: { projects: Project[] }) {
 
   /** The visible control for the automation (§16 Agency): pause/play, plus
    * an honest reset — choosing play is fresh consent, clearing any earlier
-   * user-drive stop. */
+   * user-drive stop. The epoch bump on stop invalidates any tick or
+   * continuation armed before this deliberate choice. */
   const toggleAuto = useCallback(() => {
     if (autoStateRef.current === "running") {
+      autoEpochRef.current += 1;
       setAuto("stopped");
     } else {
       drivesRef.current = false;
@@ -651,18 +862,50 @@ export function FeaturedCarousel({ projects }: { projects: Project[] }) {
     syncAuto();
   }, [setAuto, syncAuto]);
 
-  if (count === 0) return null;
-
-  const pauseAuto = () => {
+  /** Hover and focus each hold an independent pause flag. Overlap (hover in
+   * → focus in → hover out) must not resume automation while the other
+   * condition still holds; pausedRef is recomputed as their OR. These are
+   * deliberately NATIVE listeners, not React's onPointerEnter/Leave: React
+   * synthesizes enter/leave from delegated over/out pairs, and that
+   * synthesis can desync under synthetic or unusual event orders — leaving
+   * a pause flag stuck and automation frozen. Native listeners fire
+   * synchronously on dispatchEvent and can't desync. */
+  const pauseAuto = (source: "hover" | "focus") => {
+    if (source === "hover") hoverPausedRef.current = true;
+    else focusPausedRef.current = true;
     pausedRef.current = true;
     setHoverPaused(true);
     syncAuto();
   };
-  const resumeAuto = () => {
-    pausedRef.current = false;
-    setHoverPaused(false);
+  const resumeAuto = (source: "hover" | "focus") => {
+    if (source === "hover") hoverPausedRef.current = false;
+    else focusPausedRef.current = false;
+    pausedRef.current = hoverPausedRef.current || focusPausedRef.current;
+    setHoverPaused(pausedRef.current);
     syncAuto();
   };
+
+  useEffect(() => {
+    const root = rootRef.current;
+    if (!root) return;
+    const onHoverPause = () => pauseAuto("hover");
+    const onHoverResume = () => resumeAuto("hover");
+    const onFocusPause = () => pauseAuto("focus");
+    const onFocusResume = () => resumeAuto("focus");
+    root.addEventListener("pointerenter", onHoverPause);
+    root.addEventListener("pointerleave", onHoverResume);
+    root.addEventListener("focusin", onFocusPause);
+    root.addEventListener("focusout", onFocusResume);
+    return () => {
+      root.removeEventListener("pointerenter", onHoverPause);
+      root.removeEventListener("pointerleave", onHoverResume);
+      root.removeEventListener("focusin", onFocusPause);
+      root.removeEventListener("focusout", onFocusResume);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [count]);
+
+  if (count === 0) return null;
 
   /** The dwell clock's display state: automation running = fill, a pause
    * condition (hover/focus/hidden tab) = freeze mid-fill, anything else
@@ -674,12 +917,7 @@ export function FeaturedCarousel({ projects }: { projects: Project[] }) {
   const dwellKey = `${active}:${dwell}`;
 
   return (
-    <div
-      onPointerEnter={pauseAuto}
-      onPointerLeave={resumeAuto}
-      onFocusCapture={pauseAuto}
-      onBlurCapture={resumeAuto}
-    >
+    <div ref={rootRef}>
       <div
         ref={viewportRef}
         role="group"
@@ -709,11 +947,12 @@ export function FeaturedCarousel({ projects }: { projects: Project[] }) {
             const real = slot >= 0 && slot < count;
             // The landing clone carries the focused state during a wrap
             // flight (slot −1 ↔ real count−1, slot count ↔ real 0), so the
-            // dim-lift doesn't lag a beat behind the teleport.
-            const focused =
-              slot === active ||
-              (slot === count && active === 0) ||
-              (slot === -1 && active === count - 1);
+            // dim-lift doesn't lag a beat behind the teleport. `logical` is
+            // the pre-normalize index, so the landing clone is focused only
+            // during the flight — at rest (logical === wrapped active) the
+            // clone reverts to neighbor depth and the REAL slide carries
+            // the focus state alone.
+            const focused = slot === logical;
             return (
               <div
                 key={key}
@@ -766,7 +1005,7 @@ export function FeaturedCarousel({ projects }: { projects: Project[] }) {
               stopAuto(); // a deliberate dot pick takes the wheel
               // Least-travel wrap: picking the dot far around the circle
               // slides the short way, never a long rewind (§7).
-              goTo(nearestWrap(index, indexRef.current, count));
+              goToAdaptive(nearestWrap(index, indexRef.current, count));
             }}
           />
         ))}

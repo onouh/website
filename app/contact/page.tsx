@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { ContactForm } from "@/components/ContactForm";
 import { PageShell, SectionHeader } from "@/components/PageChrome";
+import { Reveal } from "@/components/motion";
 import { profile } from "@/content/profile";
 
 export const metadata: Metadata = {
@@ -13,7 +14,7 @@ export default function ContactPage() {
     <PageShell muted>
       <SectionHeader index="06" label="Contact" title="Get in touch" />
       <div className="grid gap-12 md:grid-cols-2">
-        <div>
+        <Reveal>
           <p className="mb-6 text-[var(--text-mid)]">
             Send a note through the form. If email sending is not configured on this
             deployment, your message is validated and you can fall back to mailto.
@@ -50,8 +51,10 @@ export default function ContactPage() {
               </li>
             ))}
           </ul>
-        </div>
-        <ContactForm />
+        </Reveal>
+        <Reveal delay={0.1}>
+          <ContactForm />
+        </Reveal>
       </div>
     </PageShell>
   );

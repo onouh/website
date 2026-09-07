@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { ScrollProgress } from "@/components/motion";
 import { navItems } from "@/content/nav";
 
 function isActive(pathname: string, href: string) {
@@ -54,6 +55,7 @@ export function Nav() {
       className="site-nav fixed inset-x-0 top-0 z-50 bg-[var(--nav-bg)] backdrop-blur-md"
       data-scrolled={scrolled ? "" : undefined}
     >
+      <ScrollProgress />
       <nav
         className="flex items-center justify-between px-[var(--gutter)] py-4"
         aria-label="Primary"
@@ -69,12 +71,13 @@ export function Nav() {
             <li key={item.href}>
               <Link
                 href={item.href}
-                className={`text-[0.825rem] font-medium uppercase tracking-[0.06em] transition-colors ${
+                className={`nav-link text-[0.825rem] font-medium uppercase tracking-[0.06em] transition-colors ${
                   isActive(pathname, item.href)
                     ? "text-[var(--text)]"
                     : "text-[var(--text-mid)] hover:text-[var(--text)]"
                 }`}
                 aria-current={isActive(pathname, item.href) ? "page" : undefined}
+                data-active={isActive(pathname, item.href) ? "" : undefined}
               >
                 {item.label}
               </Link>

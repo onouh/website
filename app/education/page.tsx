@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { PageShell, SectionHeader } from "@/components/PageChrome";
+import { Reveal, RevealGroup, RevealItem } from "@/components/motion";
 import { coursework, education } from "@/content/education";
 import { profile } from "@/content/profile";
 
@@ -13,9 +14,10 @@ export default function EducationPage() {
   return (
     <PageShell muted>
       <SectionHeader index="05" label="Education" title="Academic Background" />
-      <div className="grid gap-6 md:grid-cols-2">
+      <RevealGroup className="grid gap-6 md:grid-cols-2" step={0.1}>
         {education.map((item) => (
-          <article
+          <RevealItem
+            as="article"
             key={item.id}
             className="rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--bg-3)] p-8"
           >
@@ -44,10 +46,10 @@ export default function EducationPage() {
                 {item.honors}
               </span>
             ) : null}
-          </article>
+          </RevealItem>
         ))}
-      </div>
-      <div className="mt-10">
+      </RevealGroup>
+      <Reveal className="mt-10">
         <h2 className="mb-4 font-[family-name:var(--font-syne)] text-lg font-semibold">
           Coursework
         </h2>
@@ -74,7 +76,7 @@ export default function EducationPage() {
             </span>
           ))}
         </div>
-      </div>
+      </Reveal>
     </PageShell>
   );
 }

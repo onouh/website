@@ -110,6 +110,15 @@ html {
   background: var(--bg);
 }
 
+/* Reading-progress hairline that sits at the bottom edge of the fixed nav.
+   The scaleX is driven from JS (springed Motion value) so it tracks real
+   scroll smoothly; this class only paints it. */
+.scroll-progress {
+  height: 2px;
+  background: linear-gradient(90deg, var(--amber), var(--blue));
+  opacity: 0.85;
+}
+
 /* Transient off-screen page transforms (route transitions) must not
    create horizontal scrollbars; clip without becoming a scroll container. */
 html,
@@ -511,6 +520,328 @@ body {
 
 .animate-fade-up {
   animation: fade-up 0.7s ease forwards;
+}
+
+/* Materialized entrance: rise + defocus. Typography lands sharp out of a
+   soft blur — the page "prints" rather than fades (§12). Same delay/fill
+   contract as .animate-fade-up, so usage is a drop-in swap. */
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(22px);
+    filter: blur(8px);
+  }
+  60% {
+    filter: blur(0);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+.animate-rise-in {
+  animation: rise-in 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Stat cards get a quiet hover lift to match .btn-primary (hover-capable
+   pointers only; touch keeps its :active press feedback). */
+@media (hover: hover) {
+  .stat-card {
+    transition:
+      transform 0.25s cubic-bezier(0.32, 0.72, 0, 1),
+      border-color 0.25s;
+  }
+
+  .stat-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--border-2);
+  }
+}
+
+/* ─── Hero aurora: two soft color fields breathing behind the grid ──────
+   Ambient, slow (20s+), transform/opacity only. It sits behind the masked
+   grid so the geometry stays crisp; the glow just gives the hero depth.
+   Paused entirely under reduced motion via the global animation kill-switch
+   further below. */
+.hero-aurora {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.hero-aurora::before,
+.hero-aurora::after {
+  content: "";
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(60px);
+  opacity: 0.5;
+  will-change: transform;
+}
+
+.hero-aurora::before {
+  top: -12%;
+  left: 55%;
+  width: 520px;
+  height: 520px;
+  background: radial-gradient(
+    circle,
+    var(--amber-glow) 0%,
+    transparent 70%
+  );
+  animation: aurora-drift-a 26s ease-in-out infinite alternate;
+}
+
+.hero-aurora::after {
+  bottom: -18%;
+  left: 8%;
+  width: 460px;
+  height: 460px;
+  background: radial-gradient(
+    circle,
+    rgba(47, 107, 255, 0.09) 0%,
+    transparent 70%
+  );
+  animation: aurora-drift-b 32s ease-in-out infinite alternate;
+}
+
+@keyframes aurora-drift-a {
+  from {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  to {
+    transform: translate3d(-120px, 60px, 0) scale(1.15);
+  }
+}
+
+@keyframes aurora-drift-b {
+  from {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  to {
+    transform: translate3d(90px, -50px, 0) scale(0.9);
+  }
+}
+
+/* The hero's amber dot-accent line: draws itself in after the label lands. */
+.hero-kicker-line {
+  transform-origin: left;
+  animation: line-grow 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.5s both;
+}
+
+@keyframes line-grow {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* ─── Intro curtain ──────────────────────────────────────────────
+   Full-screen overlay shown only on a session's first load. The inline
+   boot script (components/IntroCurtain.tsx) hides it instantly on repeat
+   visits and under reduced motion by stamping <html data-curtain-done>.
+   z-index sits above nav (50) and tooltips (60); pointer-events swallow
+   interaction during the ~1.5s typing + wipe. */
+#intro-curtain {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  pointer-events: all;
+}
+
+.intro-curtain-panel {
+  position: absolute;
+  inset: 0;
+  background: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.intro-curtain-mark {
+  font-family: var(--font-jetbrains);
+  font-size: 0.9rem;
+  letter-spacing: 0.08em;
+  color: var(--amber);
+  display: inline-flex;
+  position: relative;
+}
+
+/* Typing choreography: each letter steps in at (0.45 + i × 0.18)s with an
+   instant steps() reveal (monospace terminal feel), and the caret — a
+   block starting over the first letter — hops one 1ch column per letter
+   (steps(3) on the same 0.99s clock, ending parked one column past the
+   underscore). After the last letter the caret blinks during the hold;
+   the panel wipes at 1.55s. All delays share one clock so typing, hold,
+   and wipe stay in lockstep. */
+.intro-curtain-letter {
+  display: inline-block;
+  width: 1ch;
+  opacity: 0;
+  animation: intro-letter-in 1ms steps(1, end) forwards;
+  animation-delay: calc(0.45s + var(--letter-i) * 0.18s);
+}
+
+@keyframes intro-letter-in {
+  to {
+    opacity: 1;
+  }
+}
+
+.intro-curtain-caret {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 1ch;
+  background: var(--amber);
+  mix-blend-mode: difference;
+  opacity: 0;
+  animation:
+    intro-caret-ride 0.99s steps(3, end) 0.45s forwards,
+    intro-caret-blink 0.8s steps(2, start) 1.53s infinite;
+}
+
+/* One 1ch hop per letter (3 letters total), landing one full step past
+   the underscore — a terminal caret parking at the next prompt column. */
+@keyframes intro-caret-ride {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(3ch);
+  }
+}
+
+@keyframes intro-caret-blink {
+  0%, 49% {
+    opacity: 1;
+  }
+  50%, 100% {
+    opacity: 0;
+  }
+}
+
+/* No JS (boot script never ran): the panel wipes itself via animation.
+   The wrapper keeps pointer-events until the panel finishes, then the
+   whole overlay collapses. Wipe starts after typing (0.45 + 3×0.18 +
+   ~0.45 hold ≈ 1.55s). */
+@keyframes intro-wipe {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-101%);
+  }
+}
+
+html:not([data-curtain-done]) .intro-curtain-panel {
+  animation:
+    intro-wipe 0.7s cubic-bezier(0.76, 0, 0.24, 1) 1.55s forwards;
+}
+
+html:not([data-curtain-done]) #intro-curtain {
+  animation: intro-collapse 0s linear 2.4s forwards;
+}
+
+@keyframes intro-collapse {
+  to {
+    display: none;
+  }
+}
+
+/* JS path: the boot script stamps data-curtain-done on repeat visits
+   before first paint; the finish script stamps it when the wipe ends.
+   The node itself stays mounted (removing it pre-hydration desyncs
+   React's tree — hydration error #418); display:none is invisible to
+   both the user and hydration. */
+html[data-curtain-done] #intro-curtain {
+  display: none;
+  pointer-events: none;
+}
+
+/* Scroll lock while the curtain is up (first-visit path only — repeat
+   visits remove the node before paint, so nothing to lock). */
+html:not([data-curtain-done]) {
+  overflow: hidden;
+}
+
+html[data-curtain-done] {
+  overflow: visible;
+}
+
+/* Hero choreography holds until the curtain lifts. The hold applies only
+   when JS is present ([data-curtain-js]) — a no-JS first visit gets the
+   CSS wipe and starts its entrances on the original schedule. Repeat
+   visits and reduced motion stamp data-curtain-done pre-paint, so
+   entrances run immediately there — same behavior as before this feature. */
+html[data-curtain-js]:not([data-curtain-done]) .animate-rise-in,
+html[data-curtain-js]:not([data-curtain-done]) .animate-fade-up,
+html[data-curtain-js]:not([data-curtain-done]) .hero-kicker-line {
+  animation-play-state: paused;
+}
+
+html[data-curtain-js] .animate-rise-in,
+html[data-curtain-js] .animate-fade-up,
+html[data-curtain-js] .hero-kicker-line {
+  animation-play-state: running;
+}
+
+/* ─── Nav: entrance + link underline ──────────────────────────────────── */
+
+/* The wordmark and links settle in once on load. */
+@keyframes nav-drop {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.site-nav {
+  animation: nav-drop 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Underline grows from the left on hover — a modern alternative to color-only
+   hovers, applied via the .nav-link class. Color still transitions in
+   parallel (kept from the original hover treatment). */
+.nav-link {
+  position: relative;
+}
+
+.nav-link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -4px;
+  height: 1.5px;
+  background: var(--amber);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.25s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+@media (hover: hover) {
+  .nav-link:hover::after {
+    transform: scaleX(1);
+  }
+}
+
+/* Active page keeps a persistent partial underline. */
+.nav-link[data-active]::after {
+  transform: scaleX(1);
+  background: var(--amber-dim);
 }
 
 .ibm-wordmark {

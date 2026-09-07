@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { IBM_Plex_Mono, IBM_Plex_Sans, IBM_Plex_Serif } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { Footer } from "@/components/Footer";
+import { IntroCurtain } from "@/components/IntroCurtain";
 import { Nav } from "@/components/Nav";
 import { PageTransition } from "@/components/PageTransition";
 import { defaultMetadata } from "@/content/seo";
@@ -41,6 +42,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${ibmPlexSans.variable} ${ibmPlexMono.variable} ${ibmPlexSerif.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col bg-canvas font-sans text-ink">
+        <IntroCurtain />
         <a className="skip-link" href="#main">
           Skip to content
         </a>

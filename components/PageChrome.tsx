@@ -1,3 +1,5 @@
+import { Reveal } from "@/components/motion";
+
 export function SectionHeader({
   index,
   label,
@@ -8,14 +10,14 @@ export function SectionHeader({
   title: string;
 }) {
   return (
-    <div className="mb-10">
+    <Reveal className="mb-10">
       <div className="section-label">
         {index} — {label}
       </div>
       <h1 className="font-[family-name:var(--font-syne)] text-[clamp(1.75rem,3.5vw,2.5rem)] font-bold leading-[1.1] tracking-tight text-[var(--text)]">
         {title}
       </h1>
-    </div>
+    </Reveal>
   );
 }
 

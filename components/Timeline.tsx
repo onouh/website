@@ -1,10 +1,19 @@
+import { RevealGroup, RevealItem } from "@/components/motion";
 import type { ExperienceItem } from "@/content/types";
 
 export function Timeline({ items }: { items: ExperienceItem[] }) {
   return (
-    <ol className="relative m-0 list-none p-0 before:absolute before:top-2 before:bottom-0 before:left-0 before:w-px before:bg-[var(--border-2)]">
+    <RevealGroup
+      as="ol"
+      step={0.12}
+      className="relative m-0 list-none p-0 before:absolute before:top-2 before:bottom-0 before:left-0 before:w-px before:bg-[var(--border-2)]"
+    >
       {items.map((item) => (
-        <li key={`${item.company}-${item.date}`} className="relative mb-12 pl-10 last:mb-0">
+        <RevealItem
+          as="li"
+          key={`${item.company}-${item.date}`}
+          className="relative mb-12 pl-10 last:mb-0"
+        >
           <span
             aria-hidden
             className="absolute top-2 left-[-5px] h-[11px] w-[11px] rounded-full border-2 border-[var(--bg-2)] bg-[var(--amber)] shadow-[0_0_0_3px_rgba(47,107,255,0.15)]"
@@ -25,8 +34,8 @@ export function Timeline({ items }: { items: ExperienceItem[] }) {
               <li key={bullet}>{bullet}</li>
             ))}
           </ul>
-        </li>
+        </RevealItem>
       ))}
-    </ol>
+    </RevealGroup>
   );
 }

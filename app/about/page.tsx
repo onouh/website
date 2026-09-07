@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { PageShell, SectionHeader } from "@/components/PageChrome";
+import { CountUp, Reveal } from "@/components/motion";
 import { profile } from "@/content/profile";
 
 export const metadata: Metadata = {
@@ -12,7 +13,7 @@ export default function AboutPage() {
     <PageShell muted>
       <SectionHeader index="01" label="About" title="Who I Am" />
       <div className="grid gap-12 md:grid-cols-2">
-        <div className="space-y-5 text-[var(--text-mid)] leading-[1.8]">
+        <Reveal className="space-y-5 text-[var(--text-mid)] leading-[1.8]">
           {profile.summary.map((paragraph) => (
             <p key={paragraph}>{paragraph}</p>
           ))}
@@ -52,8 +53,8 @@ export default function AboutPage() {
               </li>
             ))}
           </ul>
-        </div>
-        <div>
+        </Reveal>
+        <Reveal delay={0.1}>
           <h2 className="mb-4 font-[family-name:var(--font-syne)] text-lg font-semibold">
             Languages
           </h2>
@@ -71,16 +72,16 @@ export default function AboutPage() {
             {profile.stats.map((stat) => (
               <div
                 key={stat.label}
-                className="rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--bg-3)] p-6"
+                className="stat-card rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--bg-3)] p-6"
               >
                 <div className="mb-1 font-[family-name:var(--font-syne)] text-3xl font-bold tracking-tight text-[var(--amber)]">
-                  {stat.value}
+                  <CountUp value={stat.value} />
                 </div>
                 <div className="text-[0.8rem] text-[var(--text-dim)]">{stat.label}</div>
               </div>
             ))}
           </div>
-        </div>
+        </Reveal>
       </div>
     </PageShell>
   );
