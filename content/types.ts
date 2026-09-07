@@ -97,4 +97,11 @@ export type Project = {
   featured?: boolean;
   bullets?: string[];
   repo?: string;
+  /** Card thumbnail, served from /public (e.g. "/projects/veripay.webp")
+   * via next/image. Omit for the deterministic gradient fallback. */
+  thumbnail?: string;
+  /** Headline numbers for the case-study metrics band. Values support the
+   * CountUp format ("26", "70B", "5+", "3.6"). Keep them honest — each
+   * must be derivable from the case study text. */
+  metrics?: { value: string; label: string }[];
 };
