@@ -11,6 +11,7 @@ import {
 } from "react";
 import { ScrollProgress } from "@/components/motion";
 import { navItems } from "@/content/nav";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { useScrollSpy } from "@/components/useScrollSpy";
 
 function isActive(pathname: string, href: string) {
@@ -195,25 +196,28 @@ export function Nav() {
               );
             })}
           </ul>
-          <button
-            ref={burgerRef}
+          <div className="flex items-center gap-3">
+            <ThemeToggle />
+            <button
+              ref={burgerRef}
             type="button"
             className="nav-burger inline-flex h-10 w-10 items-center justify-center rounded-[var(--radius)] border border-[var(--border-2)] text-[var(--text)] transition-transform duration-100 ease-out active:scale-95 md:hidden"
-            aria-expanded={open}
-            aria-controls="mobile-nav"
-            onClick={() => (open ? closeMenu() : setOpen(true))}
-          >
-            <span className="sr-only">{open ? "Close menu" : "Open menu"}</span>
-            <span aria-hidden className="flex flex-col gap-1.5">
-              <span
-                className={`block h-px w-4 bg-current transition ${open ? "translate-y-1 rotate-45" : ""}`}
-              />
-              <span className={`block h-px w-4 bg-current ${open ? "opacity-0" : ""}`} />
-              <span
-                className={`block h-px w-4 bg-current transition ${open ? "-translate-y-1 -rotate-45" : ""}`}
-              />
-            </span>
-          </button>
+              aria-expanded={open}
+              aria-controls="mobile-nav"
+              onClick={() => (open ? closeMenu() : setOpen(true))}
+            >
+              <span className="sr-only">{open ? "Close menu" : "Open menu"}</span>
+              <span aria-hidden className="flex flex-col gap-1.5">
+                <span
+                  className={`block h-px w-4 bg-current transition ${open ? "translate-y-1 rotate-45" : ""}`}
+                />
+                <span className={`block h-px w-4 bg-current ${open ? "opacity-0" : ""}`} />
+                <span
+                  className={`block h-px w-4 bg-current transition ${open ? "-translate-y-1 -rotate-45" : ""}`}
+                />
+              </span>
+            </button>
+          </div>
         </nav>
         {drawerVisible ? (
           <ul

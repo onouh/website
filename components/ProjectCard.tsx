@@ -3,20 +3,22 @@ import Link from "next/link";
 import { ProjectIcon } from "@/components/ProjectIcon";
 import type { Project } from "@/content/types";
 
-/** Deterministic gradient for cards without a thumbnail: stable per slug,
- * always within the site's dark brand neighborhood (amber/blue leads into
- * navy depth), so the grid reads varied but on-brand. */
-const GRADIENTS = [
-  "linear-gradient(135deg, hsl(38 65% 13%) 0%, hsl(220 55% 8%) 100%)",
-  "linear-gradient(135deg, hsl(222 60% 13%) 0%, hsl(195 50% 8%) 100%)",
-  "linear-gradient(135deg, hsl(215 55% 14%) 0%, hsl(260 45% 9%) 100%)",
-  "linear-gradient(135deg, hsl(30 55% 12%) 0%, hsl(230 60% 9%) 100%)",
-];
+/** Deterministic plate for cards without a thumbnail: stable per slug,
+ * drawn from the --plate-N tokens so each theme renders the gradient in its
+ * own palette (deep brand neighborhood on dark, soft tint on light — the
+ * dark-only literals this replaced rendered as near-black slabs in light
+ * mode). Four hue neighborhoods keep the grid varied but on-brand. */
+const PLATES = [
+  "var(--plate-1)",
+  "var(--plate-2)",
+  "var(--plate-3)",
+  "var(--plate-4)",
+] as const;
 
 function fallbackGradient(slug: string) {
   let h = 0;
   for (const ch of slug) h = (h * 31 + ch.charCodeAt(0)) | 0;
-  return GRADIENTS[Math.abs(h) % GRADIENTS.length];
+  return PLATES[Math.abs(h) % PLATES.length];
 }
 
 export function ProjectCard({

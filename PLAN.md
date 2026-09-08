@@ -36,11 +36,11 @@ Working sequence: Tier 1 in one sitting → Tier 2 items 5+6 together (shared as
 ## Tier 2 — structural (a focused day each)
 
 ### 5. Case-study template (projects/[slug])
-- [ ] Sticky section nav for long case studies (Overview / Build / Outcome).
-- [ ] Key-metrics band reusing the CountUp system.
-- [ ] Screenshot/image treatment with lightbox and `next/image` sizing.
-- [ ] Related-projects footer strip.
-- **Accepts:** case studies read like product pages, not walls of text.
+- [x] Sticky section nav: floating rounded bar pinning under the site nav, chips derived from the MDX H2 outline (`getProjectSections` + h2 anchor ids); position-based scrollspy tuned to the anchor rest line so a clicked chip is always the active one.
+- [x] Key-metrics band reusing the CountUp system (`Project.metrics?`, honest numbers grounded in each case study's text; band omitted when absent).
+- [x] Related-projects footer strip: shared-filter projects first, falls back to the rest.
+- [ ] Screenshot/lightbox treatment — covered by item 6's media system once real screenshots exist.
+- **Accepts:** case studies read like product pages, not walls of text. ✓ verified (tests/e2e/case-study.spec.ts, 5 tests)
 
 ### 6. Media in the project grid
 - [x] Card media system: `Project.thumbnail?` field → full-bleed 16:9 `next/image` banner (fill + `sizes`, lazy, zero CLS), slow hover zoom with `motion-reduce` opt-out.
@@ -58,11 +58,12 @@ Working sequence: Tier 1 in one sitting → Tier 2 items 5+6 together (shared as
 
 ## Tier 3 — signature bets
 
-### 8. Light theme
-- [ ] Light variant of the CSS variable tokens (amber stays the accent; re-derive text/surface).
-- [ ] Persisted toggle (localStorage + `color-scheme`), no flash on load (boot-script pattern like the curtain).
-- [ ] Audit spotlight/aurora/magnetic effects under light theme.
-- **Accepts:** both themes pass contrast checks; no FOUC on reload.
+### 8. Light theme + theme system
+- [x] Light palette — *(pre-existed*: the token block's default IS the light theme; dark was the media-query override.)*
+- [x] Persisted toggle (`ThemeToggle` in the nav): OS-follow by default, explicit `<html data-theme>` + localStorage on click, duplicated dark token block scoped to `[data-theme="dark"]` so the choice beats the OS.
+- [x] No flash on load: the intro-curtain boot script applies the stored theme pre-paint (same pattern as the curtain itself); `theme-color` viewport tint added for browser chrome.
+- [x] Light-mode audit: hardcoded-color sweep — OG/error shells are static-by-design; effect layers (aurora/spotlight/curtain/drawer) were already token-driven; the one real breaker (`text-red-400` at 2.8:1 on light) moved to the `--red` token.
+- **Accepts:** both themes pass contrast checks; no FOUC on reload. ✓ verified (tests/e2e/theme.spec.ts, 4 tests — OS default, toggle + persistence, explicit-over-OS, accent flip)
 
 ### 9. Experience page as scroll story
 - [ ] Pinned timeline scrub: each role's details reveal as the connecting line draws itself.

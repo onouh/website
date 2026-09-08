@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { IBM_Plex_Mono, IBM_Plex_Sans, IBM_Plex_Serif } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { Footer } from "@/components/Footer";
@@ -33,6 +33,15 @@ const ibmPlexSerif = IBM_Plex_Serif({
 export const metadata: Metadata = {
   ...defaultMetadata,
   metadataBase: new URL(getSiteUrl()),
+};
+
+/* Browser-chrome tint follows the OS theme (the in-page toggle is JS-only,
+   which static themeColor can't track — the OS pair covers the common case). */
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f7f8fa" },
+    { media: "(prefers-color-scheme: dark)", color: "#05070c" },
+  ],
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

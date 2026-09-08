@@ -11,6 +11,13 @@ export default defineConfig({
   use: {
     baseURL: "http://127.0.0.1:3111",
     trace: "retain-on-failure",
+    // Full-browser headless (channel "chromium") instead of the separate
+    // headless-shell download: this machine's Playwright browser cache was
+    // wiped mid-session and the CDN re-download kept timing out — but the
+    // full chromium-1234 build landed. This runs the suite on it with zero
+    // extra downloads.
+    channel: "chromium",
+    headless: true,
   },
   projects: [
     {

@@ -76,7 +76,7 @@ export function ContactForm() {
           className={fieldCls("name")}
         />
         {show("name") ? (
-          <span id="contact-name-error" className="text-xs text-red-400">
+          <span id="contact-name-error" className="text-xs text-[var(--red)]">
             {errors.name}
           </span>
         ) : null}
@@ -96,7 +96,7 @@ export function ContactForm() {
           className={fieldCls("email")}
         />
         {show("email") ? (
-          <span id="contact-email-error" className="text-xs text-red-400">
+          <span id="contact-email-error" className="text-xs text-[var(--red)]">
             {errors.email}
           </span>
         ) : null}
@@ -115,7 +115,7 @@ export function ContactForm() {
           className={fieldCls("message")}
         />
         {show("message") ? (
-          <span id="contact-message-error" className="text-xs text-red-400">
+          <span id="contact-message-error" className="text-xs text-[var(--red)]">
             {errors.message}
           </span>
         ) : null}
@@ -158,7 +158,7 @@ export function ContactForm() {
           </p>
         ) : null}
         {state && !state.ok ? (
-          <p className="flex flex-col gap-1 text-sm text-red-400">
+          <p className="flex flex-col gap-1 text-sm text-[var(--red)]">
             <span>{state.error}</span>
             {state.mailto ? (
               <a className="w-fit underline" href={state.mailto}>

@@ -20,9 +20,10 @@
  * user and harmless to hydration.
  */
 
-/** Boot: runs pre-paint inside the curtain node. Marks JS presence, then
- * stamps done (CSS hides the curtain) on repeat visits / reduced motion. */
-const BOOT_SNIPPET = `try{var d=document.documentElement;d.setAttribute("data-curtain-js","");if(sessionStorage.getItem("intro-seen")||matchMedia("(prefers-reduced-motion: reduce)").matches){d.setAttribute("data-curtain-done","");}}catch(e){}`;
+/** Boot: runs pre-paint inside the curtain node. Applies the persisted
+ * theme before first paint (no flash), marks JS presence, then stamps done
+ * (CSS hides the curtain) on repeat visits / reduced motion. */
+const BOOT_SNIPPET = `try{var d=document.documentElement;var t=localStorage.getItem("theme");if(t==="dark"||t==="light"){d.setAttribute("data-theme",t);}d.setAttribute("data-curtain-js","");if(sessionStorage.getItem("intro-seen")||matchMedia("(prefers-reduced-motion: reduce)").matches){d.setAttribute("data-curtain-done","");}}catch(e){}`;
 
 /** Finish: first visit only — when the wipe ends (or a stalled animation
  * clock trips the fallback), release the page and remember the visit. */
