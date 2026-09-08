@@ -17,6 +17,10 @@ export const omnitaps: Project = {
   ],
   filters: ["software"],
   featured: true,
+  metrics: [
+    { value: "1", label: "catch-all serverless function" },
+    { value: "2", label: "architectures on the Docker image" },
+  ],
   repo: "https://github.com/amouriii/Omnitaps",
   bullets: [
     "Shipped a live multi-tenant platform (omnitaps.vercel.app) spanning guest-facing café sites, QR menus, reviews, chatbot, and a full operator console with Supabase Auth-scoped admin routes.",

@@ -16,6 +16,10 @@ export const oracle: Project = {
   ],
   filters: ["systems"],
   featured: true,
+  metrics: [
+    { value: "70B", label: "parameters, sharded across Macs" },
+    { value: "76B", label: "packed tensor wire transport" },
+  ],
   repo: "https://github.com/amouriii/Oracle",
   bullets: [
     "Built a C++20 inference engine that shards a 70B-Q4 transformer by layer across a Thunderbolt-3 IP mesh of Macs, keeping KV caches local to each worker and streaming F16 activations between stages.",

@@ -17,6 +17,11 @@ export const veripay: Project = {
   ],
   filters: ["ml", "software"],
   featured: true,
+  metrics: [
+    { value: "26", label: "FastAPI/gRPC services" },
+    { value: "5", label: "PostgreSQL domains" },
+    { value: "1", label: "command boots the full stack" },
+  ],
   repo: "https://github.com/amouriii/VeriPay",
   bullets: [
     "Architected 26 FastAPI/gRPC microservices — one per diagrammed component — with protobuf contracts as the shared boundary between Python and TypeScript consumers.",

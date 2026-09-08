@@ -1,10 +1,16 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { CaseStudyNav } from "@/components/CaseStudyNav";
 import { EdgeSwipeBack } from "@/components/EdgeSwipeBack";
 import { PageShell } from "@/components/PageChrome";
+import { CountUp } from "@/components/motion";
 import { getProject, projects } from "@/content/projects";
-import { getProjectBody, projectSlugs } from "@/lib/project-mdx";
+import {
+  getProjectBody,
+  getProjectSections,
+  projectSlugs,
+} from "@/lib/project-mdx";
 
 export function generateStaticParams() {
   return projectSlugs().map((slug) => ({ slug }));
@@ -32,7 +38,18 @@ export default async function ProjectCaseStudyPage({
   const { slug } = await params;
   const project = getProject(slug);
   if (!project) notFound();
-  const body = await getProjectBody(slug);
+  const [body, sections] = await Promise.all([
+    getProjectBody(slug),
+    getProjectSections(slug),
+  ]);
+
+  // Related: same-filter projects first, then the rest, excluding self.
+  const sharesFilter = (item: (typeof projects)[number]) =>
+    item.filters.some((f) => project.filters.includes(f));
+  const related = [
+    ...projects.filter((p) => p.slug !== project.slug && sharesFilter(p)),
+    ...projects.filter((p) => p.slug !== project.slug && !sharesFilter(p)),
+  ].slice(0, 3);
 
   return (
     <PageShell>
@@ -72,6 +89,24 @@ export default async function ProjectCaseStudyPage({
           </a>
         ) : null}
       </div>
+      {project.metrics?.length ? (
+        <div className="mb-10 grid max-w-3xl grid-cols-3 gap-px overflow-hidden rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--border)]">
+          {project.metrics.map((metric) => (
+            <div
+              key={metric.label}
+              className="flex flex-col items-center gap-1 bg-[var(--bg-2)] px-3 py-5 text-center"
+            >
+              <span className="font-[family-name:var(--font-syne)] text-2xl font-bold text-[var(--amber)]">
+                <CountUp value={metric.value} />
+              </span>
+              <span className="text-[0.72rem] leading-snug text-[var(--text-dim)]">
+                {metric.label}
+              </span>
+            </div>
+          ))}
+        </div>
+      ) : null}
+      <CaseStudyNav sections={sections} />
       <div className="max-w-3xl">{body}</div>
       {project.bullets?.length ? (
         <div className="mt-12 max-w-3xl">
@@ -85,11 +120,12 @@ export default async function ProjectCaseStudyPage({
           </ul>
         </div>
       ) : null}
-      <div className="mt-10 flex flex-wrap gap-2">
-        {projects
-          .filter((item) => item.slug !== project.slug)
-          .slice(0, 3)
-          .map((item) => (
+      <div className="mt-12 max-w-3xl">
+        <h2 className="mb-3 font-[family-name:var(--font-syne)] text-xl font-bold">
+          Related projects
+        </h2>
+        <div className="flex flex-wrap gap-2">
+          {related.map((item) => (
             <Link
               key={item.slug}
               href={`/projects/${item.slug}`}
@@ -98,6 +134,7 @@ export default async function ProjectCaseStudyPage({
               {item.name}
             </Link>
           ))}
+        </div>
       </div>
       </EdgeSwipeBack>
     </PageShell>
