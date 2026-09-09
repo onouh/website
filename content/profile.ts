@@ -11,6 +11,7 @@ export const profile: Profile = {
   phones: [{ display: "+20 (120) 006-3055", tel: "+201200063055" }],
   tagline:
     "Third-year Computer and Artificial Intelligence Engineering student focused on cross-stack development, from hardware architecture to scalable software.",
+  availability: "Open to work — on-site or remote",
   summary: [
     "Third-year Computer and Artificial Intelligence Engineering student focused on cross-stack development, from hardware architecture to scalable software. Experienced in C/C++, Python, and C# through the hands-on engineering of custom OS kernels, normalized enterprise databases, and deep learning pipelines.",
     "I'm drawn to the intersection of low-level systems thinking and high-level intelligent systems — kernels, compilers, FPGA datapaths, and learning pipelines in the same toolkit.",

@@ -1,12 +1,12 @@
 import type { Metadata, Viewport } from "next";
 import { IBM_Plex_Mono, IBM_Plex_Sans, IBM_Plex_Serif } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Footer } from "@/components/Footer";
 import { IntroCurtain } from "@/components/IntroCurtain";
 import { Nav } from "@/components/Nav";
 import { PageTransition } from "@/components/PageTransition";
 import { defaultMetadata } from "@/content/seo";
-import { getSiteUrl } from "@/lib/site";
 import "./globals.css";
 
 const ibmPlexSans = IBM_Plex_Sans({
@@ -32,7 +32,6 @@ const ibmPlexSerif = IBM_Plex_Serif({
 
 export const metadata: Metadata = {
   ...defaultMetadata,
-  metadataBase: new URL(getSiteUrl()),
 };
 
 /* Browser-chrome tint follows the OS theme (the in-page toggle is JS-only,
@@ -61,6 +60,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         </main>
         <Footer />
         <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );

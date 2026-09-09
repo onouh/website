@@ -14,6 +14,11 @@ export const fibonacciHeap: Project = {
     "C++17",
   ],
   filters: ["systems"],
+  metrics: [
+    { value: "O(1)", label: "amortized insert, get-min, decrease-key, merge" },
+    { value: "O(log n)", label: "amortized extract-min" },
+    { value: "2", label: "Qt 6 apps built on it" },
+  ],
   repo: "https://github.com/onouh/FibonacciHeap",
   bullets: [
     "Implemented a fully templated C++17 Fibonacci heap with O(1) amortized insert, get-min, decrease-key, and merge, O(log n) amortized extract-min and delete, and cascading-cut maintenance with leak-free memory management.",

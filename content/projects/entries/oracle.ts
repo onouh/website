@@ -17,8 +17,9 @@ export const oracle: Project = {
   filters: ["systems"],
   featured: true,
   metrics: [
-    { value: "70B", label: "parameters, sharded across Macs" },
-    { value: "76B", label: "packed tensor wire transport" },
+    { value: "70B", label: "parameters sharded across the cluster" },
+    { value: "3", label: "Macs in the Thunderbolt-3 pipeline" },
+    { value: "76", label: "byte packed wire header on the hot path" },
   ],
   repo: "https://github.com/amouriii/Oracle",
   bullets: [

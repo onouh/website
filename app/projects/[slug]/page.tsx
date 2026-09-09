@@ -6,6 +6,7 @@ import { EdgeSwipeBack } from "@/components/EdgeSwipeBack";
 import { PageShell } from "@/components/PageChrome";
 import { CountUp } from "@/components/motion";
 import { getProject, projects } from "@/content/projects";
+import { routeMetadata } from "@/content/seo";
 import {
   getProjectBody,
   getProjectSections,
@@ -23,11 +24,13 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params;
   const project = getProject(slug);
-  if (!project) return { title: "Project" };
-  return {
+  const path = `/projects/${slug}`;
+  if (!project) return routeMetadata(path, { title: "Project" });
+  return routeMetadata(path, {
     title: project.name,
     description: project.summary,
-  };
+    openGraph: { type: "article" },
+  });
 }
 
 export default async function ProjectCaseStudyPage({
@@ -43,13 +46,19 @@ export default async function ProjectCaseStudyPage({
     getProjectSections(slug),
   ]);
 
-  // Related: same-filter projects first, then the rest, excluding self.
+  // Related: explicit cross-links first (item 7: kernel ↔ compiler ↔
+  // processor), then shared-filter projects, deduped, excluding self.
   const sharesFilter = (item: (typeof projects)[number]) =>
     item.filters.some((f) => project.filters.includes(f));
-  const related = [
+  const explicit = (project.related ?? [])
+    .map((slug) => projects.find((p) => p.slug === slug))
+    .filter((p): p is (typeof projects)[number] => Boolean(p) && p!.slug !== project.slug);
+  const seen = new Set(explicit.map((p) => p.slug));
+  const fill = [
     ...projects.filter((p) => p.slug !== project.slug && sharesFilter(p)),
     ...projects.filter((p) => p.slug !== project.slug && !sharesFilter(p)),
-  ].slice(0, 3);
+  ].filter((p) => !seen.has(p.slug));
+  const related = [...explicit, ...fill].slice(0, 3);
 
   return (
     <PageShell>

@@ -1,20 +1,33 @@
 import Link from "next/link";
+import { AvailabilityBadge } from "@/components/AvailabilityBadge";
 import { FeaturedCarousel } from "@/components/FeaturedCarousel";
 import { HeroMotion, Magnetic } from "@/components/HeroMotion";
+import { TrackedLink } from "@/components/TrackedLink";
 import { Reveal, RevealGroup, RevealItem, CountUp } from "@/components/motion";
 import { featuredProjects } from "@/content/projects";
 import { profile } from "@/content/profile";
+import { homeGraph, serializeJsonLd } from "@/lib/jsonld";
+import { getSiteUrl } from "@/lib/site";
 
 export default function HomePage() {
   const featured = featuredProjects();
 
   return (
     <>
+      {/* Structured data (PLAN.md item 3): ProfilePage + Person, the identity
+          graph for the site. Escaped per the Next.js JSON-LD guide. */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: serializeJsonLd(homeGraph(getSiteUrl())),
+        }}
+      />
       <HeroMotion>
         <div className="hero-grid-bg" aria-hidden />
         <div className="hero-aurora" aria-hidden />
 
         <div className="relative mx-auto w-full max-w-[860px]">
+          <AvailabilityBadge />
           <p className="animate-rise-in mb-7 inline-flex items-center gap-2 font-[family-name:var(--font-jetbrains)] text-[0.78rem] tracking-[0.1em] text-[var(--amber)] [animation-delay:0.1s] opacity-0">
             <span
               aria-hidden
@@ -47,17 +60,40 @@ export default function HomePage() {
                 Resume
               </Link>
             </Magnetic>
+            {/* Social profiles sit one step below the primary CTAs (PLAN.md
+                item 4): mono text-links instead of buttons, no magnetic
+                wrapper — Get in touch / projects / resume stay the hero's
+                pull targets. */}
+            <span
+              aria-hidden
+              className="hidden h-6 w-px bg-[var(--border-2)] sm:inline-block"
+            />
             {profile.social.map((link) => (
-              <Magnetic key={link.href}>
-                <a
-                  href={link.href}
-                  className="btn btn-outline"
-                  target="_blank"
-                  rel="noreferrer"
+              <TrackedLink
+                key={link.href}
+                href={link.href}
+                target="_blank"
+                rel="noreferrer"
+                aria-label={`${link.label} (opens in a new tab)`}
+                event="social_click"
+                properties={{ network: link.label, placement: "hero" }}
+                className="hero-social-link animate-fade-up inline-flex items-center gap-1.5 font-[family-name:var(--font-jetbrains)] text-[0.8rem] text-[var(--text-dim)] [animation-delay:0.6s] opacity-0"
+              >
+                {link.label}
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="h-3 w-3"
+                  aria-hidden
                 >
-                  {link.label}
-                </a>
-              </Magnetic>
+                  <path d="M7 17 17 7" />
+                  <path d="M9 7h8v8" />
+                </svg>
+              </TrackedLink>
             ))}
           </div>
         </div>

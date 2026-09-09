@@ -4,15 +4,15 @@ slug: 32-bit-processor
 
 ## Problem
 
-I wanted a CPU I could simulate instruction-by-instruction: datapath, control, and hazards — not a black-box ISA slide.
+A CPU is easy to draw and hard to trust. Block diagrams hide whether the control unit actually decodes, whether branches actually resolve, and whether hazards actually corrupt state. I wanted a processor I could simulate instruction-by-instruction and watch those questions get answered.
 
 ## Approach
 
-I designed a modular 32-bit single-cycle MIPS datapath in VHDL with the Xilinx toolchain: custom ALU, register file, and distinct instruction/data memory. A hardwired control unit decodes R, I, and J formats and drives opcode-dependent execution. Testbenches validate branch logic, datapath timing, ALU flags, and structural register hazards.
+I designed a modular 32-bit single-cycle MIPS datapath in VHDL on the Xilinx toolchain: a custom ALU, register file, and distinct instruction/data memory blocks. A hardwired control unit decodes all three MIPS instruction formats — R, I, and J — driving opcode-dependent execution signals and data flow across the processor. Simulation testbenches cover four areas: opcode branching logic, datapath timing constraints, ALU flags, and structural register hazards.
 
 ## Outcome
 
-The processor is simulatable end-to-end, which made RTL, instruction formats, and hazard thinking inspectable rather than assumed.
+A 32-bit single-cycle processor that simulates end-to-end, with all three instruction formats decoded in hardware and testbench coverage across branching, timing, flags, and hazards. RTL stopped being notation: register widths, control signals, and hazard windows became things I could measure in a waveform, not assume on a slide.
 
 ## Stack
 

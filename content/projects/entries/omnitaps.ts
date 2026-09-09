@@ -18,8 +18,9 @@ export const omnitaps: Project = {
   filters: ["software"],
   featured: true,
   metrics: [
-    { value: "1", label: "catch-all serverless function" },
-    { value: "2", label: "architectures on the Docker image" },
+    { value: "1", label: "catch-all function under the 12-function cap" },
+    { value: "3", label: "live integrations: Stripe, Resend, Twilio" },
+    { value: "2", label: "arch image on GHCR (amd64 + arm64)" },
   ],
   repo: "https://github.com/amouriii/Omnitaps",
   bullets: [

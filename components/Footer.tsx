@@ -1,4 +1,5 @@
 import { IbmWordmark } from "@/components/IbmWordmark";
+import { TrackedLink } from "@/components/TrackedLink";
 import { profile } from "@/content/profile";
 
 export function Footer() {
@@ -10,22 +11,26 @@ export function Footer() {
         <IbmWordmark name={profile.name} />
       </p>
       <div className="flex gap-6">
-        <a
+        <TrackedLink
           className="text-sm text-[var(--text-dim)] transition-colors hover:text-[var(--amber)]"
           href={`mailto:${profile.email}`}
+          event="email_click"
+          properties={{ placement: "footer" }}
         >
           Email
-        </a>
+        </TrackedLink>
         {profile.social.map((link) => (
-          <a
+          <TrackedLink
             key={link.href}
             className="text-sm text-[var(--text-dim)] transition-colors hover:text-[var(--amber)]"
             href={link.href}
             target="_blank"
             rel="noreferrer"
+            event="social_click"
+            properties={{ network: link.label, placement: "footer" }}
           >
             {link.label}
-          </a>
+          </TrackedLink>
         ))}
       </div>
       <p className="font-[family-name:var(--font-jetbrains)] text-xs tracking-wide text-[var(--text-dim)]">

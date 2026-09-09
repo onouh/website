@@ -76,13 +76,24 @@ test.describe("case study /projects/veripay", () => {
   });
 });
 
-test.describe("case study without metrics (fos-kernel)", () => {
-  test("omits the metrics band and still renders the section nav", async ({
+test.describe("case study metrics + cross-links (fos-kernel)", () => {
+  // PLAN.md item 7: every case study carries an honest metrics band, and the
+  // systems trio cross-links explicitly (kernel ↔ compiler ↔ processor).
+  test("renders its metrics band and leads Related with explicit cross-links", async ({
     page,
   }) => {
     await page.goto("/projects/fos-kernel");
-    await expect(page.locator(".grid.grid-cols-3")).toHaveCount(0);
-    const chips = page.locator(`${NAV} a`);
-    expect(await chips.count()).toBeGreaterThan(0);
+    const band = page.locator(".grid.grid-cols-3");
+    await expect(band).toBeVisible();
+    await expect(band).toContainText("subsystems: scheduler, allocator, pager");
+
+    const related = page
+      .locator("h2", { hasText: "Related projects" })
+      .locator("xpath=following-sibling::div//a");
+    const hrefs = await related.evaluateAll((links) =>
+      links.map((a) => a.getAttribute("href")),
+    );
+    expect(hrefs).toContain("/projects/tiny-compiler");
+    expect(hrefs).toContain("/projects/32-bit-processor");
   });
 });

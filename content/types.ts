@@ -33,6 +33,9 @@ export type Profile = {
   email: string;
   phones: Phone[];
   tagline: string;
+  /** One-line availability shown in the hero badge (PLAN.md item 4).
+   * Keep it concrete about the seeking window so recruiters can act on it. */
+  availability: string;
   summary: string[];
   beyond: string;
   stats: Stat[];
@@ -104,4 +107,8 @@ export type Project = {
    * CountUp format ("26", "70B", "5+", "3.6"). Keep them honest — each
    * must be derivable from the case study text. */
   metrics?: { value: string; label: string }[];
+  /** Explicit case-study cross-links (PLAN.md item 7: kernel ↔ compiler ↔
+   * processor). Listed first in Related; shared-filter derivation fills the
+   * rest. */
+  related?: string[];
 };

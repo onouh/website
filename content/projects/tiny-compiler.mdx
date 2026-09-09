@@ -4,15 +4,15 @@ slug: tiny-compiler
 
 ## Problem
 
-I wanted a compiler frontend I understood end-to-end: characters in, parse trees out, with recovery when the source is wrong.
+Compiler frontends are usually met through tools: flex/bison generate the code, and the theory stays theory. I wanted the reverse — every automaton hand-built, so tokenization, grammar design, and parsing are things I can debug, not just describe.
 
 ## Approach
 
-I built the frontend from scratch in C/C++. A hand-coded lexer uses custom regular expressions and Deterministic Finite Automata for tokenization and error recovery. A formal Context-Free Grammar covers functions, control-flow loops, conditionals, and multivariable arithmetic. A recursive-descent parser performs strict syntax analysis and generates visual parse trees.
+I built the frontend from scratch in C/C++ across three stages. The lexer is hand-coded from custom regular expressions compiled into Deterministic Finite Automata, tokenizing with explicit error recovery. The grammar is a formal Context-Free Grammar covering four construct classes: functions, control-flow loops, conditionals, and multivariable arithmetic. The parser is recursive-descent — one function per non-terminal — performing strict syntax analysis and generating visual parse trees so structure can be verified at a glance.
 
 ## Outcome
 
-The compiler accepts a small language through lexing and parsing with explicit error paths — automata and grammar trade-offs made concrete rather than theoretical.
+A working pipeline from raw characters to parse trees with zero parser-generator dependencies: three stages, four construct classes in the CFG, and error paths designed rather than stumbled into. Building it settled the theory the way theory only settles — by breaking: why DFAs beat backtracking, and why recursive descent mirrors the grammar directly.
 
 ## Stack
 

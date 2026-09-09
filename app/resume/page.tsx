@@ -1,16 +1,18 @@
 import type { Metadata } from "next";
 import { PageShell, SectionHeader } from "@/components/PageChrome";
 import { Reveal } from "@/components/motion";
+import { TrackedLink } from "@/components/TrackedLink";
 import { education } from "@/content/education";
 import { experienceChronological } from "@/content/experience";
 import { profile } from "@/content/profile";
 import { projects } from "@/content/projects";
 import { skillGroups } from "@/content/skills";
+import { routeMetadata } from "@/content/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = routeMetadata("/resume", {
   title: "Resume",
   description: `Readable CV for ${profile.name}, Computer & AI Engineering.`,
-};
+});
 
 export default function ResumePage() {
   return (
@@ -18,9 +20,14 @@ export default function ResumePage() {
       <SectionHeader index="CV" label="Resume" title={profile.name} />
       <Reveal className="mb-10 flex flex-wrap items-center justify-between gap-4">
         <p className="max-w-2xl text-[var(--text-mid)]">{profile.summary[0]}</p>
-        <a href="/omar-nouh-resume.pdf" className="btn btn-primary" download>
+        <TrackedLink
+          href="/omar-nouh-resume.pdf"
+          className="btn btn-primary"
+          download
+          event="pdf_download"
+        >
           Download PDF
-        </a>
+        </TrackedLink>
       </Reveal>
 
       <section id="resume-education" className="mb-12">

@@ -3,12 +3,13 @@ import { PageShell, SectionHeader } from "@/components/PageChrome";
 import { RevealGroup, RevealItem } from "@/components/motion";
 import { SkillGroup } from "@/components/SkillGroup";
 import { skillGroups } from "@/content/skills";
+import { routeMetadata } from "@/content/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = routeMetadata("/skills", {
   title: "Skills",
   description:
     "Languages, systems and architecture, and tools — C/C++, Python, VHDL, OS kernels, FPGA, and PyTorch.",
-};
+});
 
 export default function SkillsPage() {
   return (

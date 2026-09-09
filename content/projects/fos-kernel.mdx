@@ -4,15 +4,17 @@ slug: fos-kernel
 
 ## Problem
 
-Operating systems courses often stop at diagrams. I wanted a kernel I could schedule, page, and fault — not a toy loop.
+Operating systems courses often stop at diagrams: a scheduler sketch, a paging overview, and no code that actually faults. I wanted a kernel where every mechanism — scheduling, allocation, replacement — runs for real, so the trade-offs are things I've hit rather than memorized.
 
 ## Approach
 
-I engineered a custom Multi-Level Feedback Queue (MLFQ) CPU scheduler in C with dynamic priority boosting and aging so processes do not starve across queues. A dynamic kernel heap allocator handles virtual-to-physical translation, frame allocation, and hierarchical page-directory / page-table structures. Memory management uses an Nth-Chance Clock replacement algorithm tied to working-set tracking, page-file I/O, and robust page-fault handlers.
+I engineered the kernel in C as three cooperating subsystems. The CPU scheduler is a Multi-Level Feedback Queue with dynamic priority boosting and aging, so CPU-bound processes cannot starve I/O-bound ones across queues. The allocator is a dynamic kernel heap managing direct virtual-to-physical translation, frame allocation, and a hierarchical page-directory / page-table structure. Replacement is an Nth-Chance Clock algorithm tied to working-set tracking, page-file I/O, and robust page-fault handlers.
+
+Because the three are decomposed by concern, each policy can be reasoned about — and swapped — independently of the others.
 
 ## Outcome
 
-The result is a working kernel path from admission through memory and I/O, with scheduling and paging policies that can be reasoned about independently.
+A working kernel path from admission through memory and I/O: three subsystems (scheduler, allocator, pager), a two-level page-table hierarchy, and an aging policy that guarantees zero starved processes. Every mechanism is inspectable in source — scheduling and paging decisions are things I can explain line-by-line, not recite from a slide.
 
 ## Stack
 

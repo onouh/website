@@ -3,12 +3,13 @@ import { PageShell, SectionHeader } from "@/components/PageChrome";
 import { Reveal } from "@/components/motion";
 import { ProjectGallery } from "@/components/ProjectGallery";
 import type { ProjectFilterId } from "@/content/types";
+import { routeMetadata } from "@/content/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = routeMetadata("/projects", {
   title: "Projects",
   description:
     "Filterable engineering work: distributed inference engines, fraud-detection platforms, production SaaS, OS kernels, compilers, FPGA processors, and ML pipelines.",
-};
+});
 
 const filters = new Set<ProjectFilterId>([
   "os",

@@ -4,15 +4,15 @@ slug: cinema-booking
 
 ## Problem
 
-Booking software fails when the data model is loose: ad-hoc SQL, unclear roles, and races on concurrent orders.
+Booking systems fail in the data layer: ad-hoc SQL string-built in UI code, permissions enforced by hiding buttons, and concurrent orders corrupting seat state. I wanted the opposite — integrity enforced by the database itself, with the application structurally unable to bypass it.
 
 ## Approach
 
-I architected a 3NF SQL Server schema of 12 tables with strict primary/foreign keys and role-based access control. Data access is stored procedures and scalar functions only — no ad-hoc SQL. A layered C# .NET WinForms client covers authentication, payment flows, and concurrent order state for the full transaction lifecycle.
+I architected a 3NF SQL Server schema of 12 tables with strict primary/foreign key constraints and role-based access control. Every read and write funnels through modular stored procedures and scalar functions — zero ad-hoc SQL in the application layer. On top sits a layered C# .NET WinForms client covering the three transaction concerns: user authentication, secure payment flows, and concurrent order state management across the full booking lifecycle.
 
 ## Outcome
 
-The desktop system enforces integrity in the database, not in UI hope, and keeps booking flows concurrent without a query free-for-all.
+A desktop system with one governed data path: 12 tables in third normal form, zero ad-hoc queries, and booking flows that stay consistent under concurrency. The integrity rules live in the schema where they cannot be forgotten — not in UI hope.
 
 ## Stack
 

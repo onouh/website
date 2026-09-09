@@ -2,6 +2,7 @@
 
 import { useActionState, useState } from "react";
 import { submitContact, type ContactState } from "@/app/actions/contact";
+import { trackEvent } from "@/lib/analytics";
 
 const initial: ContactState | null = null;
 
@@ -29,6 +30,12 @@ const FIELD_BAD = "border-red-400/70";
 
 export function ContactForm() {
   const [state, action, pending] = useActionState(submitContact, initial);
+  // Mount time for the server's fill-time guard. Held in state so it survives
+  // re-renders (a ref-mutated uncontrolled input gets reset by React on the
+  // re-render that typing triggers) and rendered as a controlled value, which
+  // React keeps. React suppresses `value` hydration mismatches for inputs, so
+  // the small server/client clock delta is fine.
+  const [mountedAt] = useState(() => Date.now());
   const [values, setValues] = useState({ name: "", email: "", message: "" });
   const [touched, setTouched] = useState<Record<"name" | "email" | "message", boolean>>({
     name: false,
@@ -59,10 +66,35 @@ export function ContactForm() {
       onSubmit={(event) => {
         setAttempted(true);
         // Let the server action run — it re-validates — but if the client
-        // already knows the form is invalid, block the round-trip.
-        if (hasClientErrors) event.preventDefault();
+        // already knows the form is invalid, block the round-trip. The
+        // funnel event fires only for submits that actually go through:
+        // blocked attempts are validation noise, not conversion intent.
+        if (hasClientErrors) {
+          event.preventDefault();
+          return;
+        }
+        trackEvent("contact_submit");
       }}
     >
+      {/* Mount time for the server's fill-time guard (see mountedAt above). */}
+      <input type="hidden" name="ts" value={mountedAt} />
+
+      {/* Honeypot: off-screen, out of the a11y tree and not focusable. Bots
+          that fill every named field trip here; humans never see it. */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -left-[9999px] top-0 h-px w-px overflow-hidden"
+      >
+        <label htmlFor="contact-website">Website</label>
+        <input
+          id="contact-website"
+          name="website"
+          type="text"
+          tabIndex={-1}
+          autoComplete="off"
+        />
+      </div>
+
       <label className="flex flex-col gap-1.5 text-sm text-[var(--text-mid)]">
         Name
         <input
@@ -148,7 +180,9 @@ export function ContactForm() {
             <span>
               {state.sentVia === "resend"
                 ? "Message sent. I'll get back to you."
-                : "Saved. If you prefer, you can also email me directly."}
+                : state.sentVia === "stored"
+                  ? "Saved. If you prefer, you can also email me directly."
+                  : "Message received."}
             </span>
             {state.mailto ? (
               <a className="w-fit underline" href={state.mailto}>

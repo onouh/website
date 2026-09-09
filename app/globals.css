@@ -745,6 +745,181 @@ body {
   }
 }
 
+/* ─── Experience scroll-story prototype (PLAN.md item 11) ──────────────
+   Pinned stage: the viewport holds while page scroll scrubs the story.
+   Desktop fine pointers only — touch keeps the stacked Timeline (momentum
+   scrolling fights pinning), reduced motion renders the same fallback in
+   JS. All motion is transform/opacity/filter; nothing here animates
+   layout. The coarse-pointer block below neutralizes the stage geometry
+   as belt-and-braces behind the component's own fallback branch. */
+.story-stage {
+  position: relative;
+}
+
+/* One viewport-height of scroll per chapter, plus one for the exit. */
+.story-length {
+  height: calc((var(--chapters, 5) + 1) * 100vh);
+}
+
+.story-pin {
+  /* Sticky holds the stage; the pin releases at the stage bottom. */
+  will-change: transform;
+}
+
+.story-backdrop {
+  position: absolute;
+  inset: 0;
+  background: var(--bg-2);
+}
+
+.story-chapter {
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
+  pointer-events: none;
+}
+
+.story-chapter[data-active] {
+  pointer-events: auto;
+}
+
+.story-chapters {
+  /* Reserve height so the pinned layout doesn't jump between chapters
+     (they're absolutely positioned on top of each other). */
+  min-height: 16rem;
+}
+
+.story-bar {
+  height: 2px;
+  border-radius: 1px;
+  background: var(--border);
+  overflow: hidden;
+}
+
+.story-bar-fill {
+  height: 100%;
+  width: 100%;
+  transform-origin: left;
+  background: linear-gradient(90deg, var(--amber), var(--blue));
+}
+
+.story-ticks {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.75rem;
+}
+
+.story-tick {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.story-tick-dot {
+  display: block;
+  width: 8px;
+  height: 8px;
+  border-radius: 9999px;
+}
+
+.story-tick-label {
+  color: var(--text-dim);
+}
+
+.story-year {
+  font-size: clamp(6rem, 14vw, 10rem);
+  letter-spacing: -0.04em;
+}
+
+/* Narrow viewports: ticks collapse to dots (labels don't fit five-across)
+   and the year spine shrinks. The header-grid stacking lives in the
+   component as `max-md:` Tailwind variants — utilities own the grid there,
+   so the cascade can't fight them. Placed AFTER the base rules so the
+   tick/year overrides win at equal specificity. The preview pane — and
+   any real phone that hits this URL — gets a composed stage, not a
+   broken one. */
+@media (max-width: 767px) {
+  .story-tick-label {
+    display: none;
+  }
+
+  .story-year {
+    font-size: clamp(4rem, 18vw, 6rem);
+  }
+
+  .story-chapters {
+    min-height: 22rem;
+  }
+}
+
+@media (pointer: coarse) {
+  .story-stage {
+    display: contents;
+  }
+
+  .story-length {
+    display: none;
+  }
+
+  .story-pin {
+    position: static;
+    height: auto;
+    overflow: visible;
+  }
+
+  .story-chapter {
+    position: static;
+    opacity: 1 !important;
+    filter: none !important;
+    transform: none !important;
+  }
+
+  .story-chapter + .story-chapter {
+    margin-top: 3rem;
+  }
+}
+
+/* ─── Hero availability strip (PLAN.md item 4) ────────────────────────
+   Live-status dot metaphor: breathes via transform/opacity only (no
+   repaint, no layout), frozen by the global reduced-motion kill-switch
+   where it simply reads as a solid dot. Amber = the site's accent signal. */
+.availability-dot {
+  animation: availability-breathe 2.6s ease-in-out infinite;
+}
+
+@keyframes availability-breathe {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(0.8);
+    opacity: 0.55;
+  }
+}
+
+/* Social profile links: demoted from buttons to quiet mono text-links one
+   step below the primary CTAs. Hover lifts the color and nudges the arrow
+   diagonally (fine pointers only; touch keeps its native tap feedback). */
+.hero-social-link {
+  transition: color 0.2s;
+}
+
+.hero-social-link svg {
+  transition: transform 0.2s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+@media (hover: hover) {
+  .hero-social-link:hover {
+    color: var(--text);
+  }
+
+  .hero-social-link:hover svg {
+    transform: translate(1px, -1px);
+  }
+}
+
 /* ─── Intro curtain ──────────────────────────────────────────────
    Full-screen overlay shown only on a session's first load. The inline
    boot script (components/IntroCurtain.tsx) hides it instantly on repeat
@@ -1028,5 +1203,98 @@ html[data-curtain-js] .hero-kicker-line {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+}
+
+/* ─── Print: /resume as a designed one-pager (PLAN.md item 5) ──────────
+   Ctrl+P on /resume is a real recruiter path. Print overrides beat the
+   inline Motion styles (they're element-level, not !important), force a
+   light, ink-friendly theme regardless of the on-screen toggle, and
+   strip every screen-only chrome: curtain, nav, footer, skip link,
+   scroll-progress bar, download button. */
+@media print {
+  :root {
+    /* Light values pinned directly: print can't run scripts, so the
+       dark-theme attribute would still be present and tokens would
+       invert to a page-wide ink trap. */
+    --bg: #ffffff;
+    --bg-2: #ffffff;
+    --bg-3: #ffffff;
+    --text: #000000;
+    --text-mid: #1a1a1a;
+    --text-dim: #333333;
+    --border: rgba(0, 0, 0, 0.2);
+    --border-2: rgba(0, 0, 0, 0.3);
+    --nav-bg: #ffffff;
+  }
+
+  #intro-curtain,
+  .site-nav,
+  footer,
+  .skip-link {
+    display: none !important;
+  }
+
+  /* Buttons exist only on screen — the PDF download CTA has no meaning
+     on paper (the reader is already holding the printout). */
+  .btn {
+    display: none !important;
+  }
+
+  /* Neutralize hydration-time inline Motion styles: no transforms,
+     full opacity even if a reveal never fired. */
+  main [style] {
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
+  }
+
+  /* The page container: no forced viewport padding, no min-height flex,
+     black on white, readable base size. */
+  main {
+    padding-top: 0 !important;
+    min-height: 0 !important;
+  }
+
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+    font-size: 11pt;
+    line-height: 1.45;
+  }
+
+  /* Section rhythm: keep headings with their first line of content,
+   never let a list row straddle a page break alone. */
+  section {
+    break-inside: auto;
+    margin-bottom: 1.25rem !important;
+  }
+
+  h2 {
+    break-after: avoid;
+    font-size: 13pt;
+  }
+
+  li {
+    break-inside: avoid;
+  }
+
+  a {
+    /* Links carry no meaning on paper — inline the target instead. */
+    color: #000000 !important;
+    text-decoration: none !important;
+  }
+
+  a[href^="http"]::after {
+    content: " (" attr(href) ")";
+    font-size: 8.5pt;
+    color: #333333;
+    word-break: break-all;
+  }
+
+  a[href^="mailto:"]::after {
+    content: " (" attr(href) ")";
+    font-size: 8.5pt;
+    color: #333333;
   }
 }

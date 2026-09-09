@@ -3,12 +3,13 @@ import { PageShell, SectionHeader } from "@/components/PageChrome";
 import { Reveal, RevealGroup, RevealItem } from "@/components/motion";
 import { coursework, education } from "@/content/education";
 import { profile } from "@/content/profile";
+import { routeMetadata } from "@/content/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = routeMetadata("/education", {
   title: "Education",
   description:
     "Dual degree in Computer & Artificial Intelligence Engineering at Ain Shams University and the University of East London.",
-};
+});
 
 export default function EducationPage() {
   return (

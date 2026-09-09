@@ -3,11 +3,12 @@ import { ContactForm } from "@/components/ContactForm";
 import { PageShell, SectionHeader } from "@/components/PageChrome";
 import { Reveal } from "@/components/motion";
 import { profile } from "@/content/profile";
+import { routeMetadata } from "@/content/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = routeMetadata("/contact", {
   title: "Contact",
   description: `Get in touch with ${profile.name} — email, LinkedIn, and GitHub.`,
-};
+});
 
 export default function ContactPage() {
   return (

@@ -14,6 +14,11 @@ export const vehicleRentalSystem: Project = {
     "Authentication",
   ],
   filters: ["software"],
+  metrics: [
+    { value: "3", label: "relational tables under FK constraints" },
+    { value: "2", label: "roles under RBAC" },
+    { value: "0", label: "CodeQL vulnerabilities" },
+  ],
   repo: "https://github.com/onouh/Vehicle-Rental-System",
   bullets: [
     "Architected a complete MVC desktop application in C++17 with Qt 6, separating views (login, dashboard, forms), controllers (AuthManager, RentalManager), and models (singleton DatabaseManager, entities).",
