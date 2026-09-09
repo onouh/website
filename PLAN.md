@@ -20,8 +20,14 @@ Item 13 stays a stretch goal — cut it first when a week goes sideways.
 ### 1. Custom domain + production env audit (1)
 - [ ] Buy/connect the domain `(needs-you: deferred 2026-09 — conscious deferral, not forgotten)`, add to Vercel, fix apex/www redirect.
 - [ ] Set `NEXT_PUBLIC_SITE_URL` — sitemap, robots, OG and future canonicals all flow from `getSiteUrl()`.
-- [ ] Verify prod secrets: `RESEND_API_KEY` and `CONTACT_TO_EMAIL` actually set on the Vercel project.
-- [ ] Send one real contact submission end-to-end and confirm the email lands.
+- [x] Verify prod secrets: `RESEND_API_KEY` set on the Vercel project 2026-09-09
+      (production, Sensitive — values marked Sensitive can't be pulled to local .env);
+      `CONTACT_TO_EMAIL` intentionally unset — the action falls back to `profile.email`.
+- [x] Send one real contact submission end-to-end and confirm the email lands.
+      ✓ 2026-09-09 — one labeled test submission through the production form action
+      returned the Resend success path ("Message sent. I'll get back to you.").
+      Gotcha worth keeping: Vercel env vars bind at build time — after adding or
+      changing them, redeploy or the running function still sees the old env.
 - [ ] Update anywhere the vercel.app URL is printed (resume PDF, README).
 - **Accepts:** site + OG cards resolve on the new domain (verified in LinkedIn Post Inspector — that's where the link gets pasted); a real submission arrives in the inbox.
 
