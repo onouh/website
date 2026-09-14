@@ -26,7 +26,11 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: "npm run build && npx next start -p 3111",
+    // Keep the fallback-path tests hermetic: .env.local may contain the
+    // production Resend key, but these tests deliberately exercise local
+    // storage and must never send a real message.
+    command:
+      "RESEND_API_KEY= CONTACT_TO_EMAIL= CONTACT_FROM_EMAIL= npm run build && RESEND_API_KEY= CONTACT_TO_EMAIL= CONTACT_FROM_EMAIL= npx next start -p 3111",
     url: "http://127.0.0.1:3111",
     reuseExistingServer: !process.env.CI,
     timeout: 240_000,

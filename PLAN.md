@@ -148,9 +148,15 @@ directly" as the outcome — never `ok: true` without a real delivery. The
 - **Accepts:** CI fails on regression, not on vibes.
 
 ### 15. Security headers (0.5)
-- [ ] `next.config.ts` headers: `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`, `frame-ancestors`.
-- [ ] CSP in report-only mode first.
+- [x] `next.config.ts` headers: `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`, `frame-ancestors`.
+- [x] CSP in report-only mode first (with `/api/csp-report` ingestion + noisy-directive filtering).
 - **Accepts:** scanner clean; zero console breakage.
+
+#### After the report-only pass
+- [ ] Watch `/api/csp-report` traffic, then tighten `script-src`/`style-src` off `'unsafe-inline' 'unsafe-eval'` once the real dependency surface is clear.
+- [ ] Flip CSP from `Content-Security-Policy-Report-Only` to `Content-Security-Policy` and re-verify analytics, OG routes, and any inline scripts/plugins.
+- [ ] Add Lighthouse CI budgets so these headers (and core perf/a11y/SEO) don't regress.
+- [ ] Make the report endpoint actionable instead of log-only: filter noise, route to a dashboard/email, or forward to a collector.
 
 ### 16. E2E expansion (0.5–1)
 - [ ] Contact form spec: the three states (success / validation / network) — the conversion endpoint has no test today.
